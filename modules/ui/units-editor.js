@@ -18,6 +18,7 @@ function editUnits() {
 
   // add listeners
   byId("distanceUnitInput").addEventListener("change", changeDistanceUnit);
+  byId("heightLegend").addEventListener("click", toggleLegend);
   byId("distanceScaleOutput").addEventListener("input", changeDistanceScale);
   byId("distanceScaleInput").addEventListener("change", changeDistanceScale);
   byId("heightUnit").addEventListener("change", changeHeightUnit);
@@ -78,6 +79,52 @@ function editUnits() {
   function changeHeightExponent() {
     calculateTemperatures();
     if (layerIsOn("toggleTemp")) drawTemp();
+  }
+
+  function toggleLegend() {
+    if (legend.selectAll("*").size()) {
+      clearLegend();
+      return;
+    } // hide legend
+
+    const numEntries = +heightLegendInput.value;
+    let arr = pack.cells.h;
+    let countMap = arr.reduce(
+      (map, value) => {map.set(value, (map.get(value) || 0) + 1); return map},
+      new Map()
+    )
+
+    const exponent = +heightExponentInput.value;
+    const scheme = getColorScheme();
+
+    const hmap = [];
+    let relevantHeights = 0;
+    countMap.forEach(function(mcount, mheight) {
+      if (mheight < 20) return;
+      relevantHeights++;
+    });
+    let bucketSize = 1;
+    if (relevantHeights > 0)
+      bucketSize = Math.floor(relevantHeights / numEntries);
+
+    countMap.forEach(function(mcount, mheight) {
+      if (mheight < 20) return;
+      const h = Math.ceil(mheight / bucketSize) * bucketSize;
+      const v = 1-(h < 20 ? h-5 : h) / 100;
+      const sRGB = scheme(v);
+
+      let a = h < 20 ? 0 : Math.pow(h - 18, exponent);
+      if (hmap.filter(hm => hm.height == h).length == 0) {
+        hmap.push({ height:h, count:mcount, altitude:a, color:sRGB });
+      }
+    });
+    console.log(hmap);
+
+    const data = hmap
+      .filter(c => c.height >= 20)
+      .sort((a, b) => b.altitude - a.altitude)
+      .map(c => [c.height, c.color, c.altitude]);
+    drawLegend("Altitude", data);
   }
 
   function changeTemperatureScale() {

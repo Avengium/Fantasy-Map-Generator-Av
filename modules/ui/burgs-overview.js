@@ -80,6 +80,7 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
       const prov = pack.cells.province[b.cell];
       const province = prov ? pack.provinces[prov].name : "";
       const culture = pack.cultures[b.culture].name;
+      const burgGroup = burgIcons.select('[data-id="3"]').node()?.parentNode.id;
 
       lines += /* html */ `<div
         class="states"
@@ -89,6 +90,7 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
         data-province="${province}"
         data-culture="${culture}"
         data-population=${population}
+        data-burgGroup=${burgGroup}
         data-type="${type}"
       >
         <span data-tip="Click to zoom into view" class="icon-dot-circled pointer"></span>
@@ -102,13 +104,29 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
         </select>
         <span data-tip="Burg population" class="icon-male"></span>
         <input data-tip="Burg population. Type to change" class="burgPopulation" value=${si(population)} />
-        <div class="burgType">
+        <input data-tip="Burg group. Type to change" class="burgPopulation" value=${burgGroup} />
+        <div class="burgFeatures" style="width: 8.2em;">
           <span
             data-tip="${b.capital ? " This burg is a state capital" : "Click to assign a capital status"}"
             class="icon-star-empty${b.capital ? "" : " inactive pointer"}"
           ></span>
           <span data-tip="Click to toggle port status" class="icon-anchor pointer${
             b.port ? "" : " inactive"
+          }" style="font-size:.9em"></span>
+          <span data-tip="Click to toggle citadel status" class="icon-chess-rook pointer${
+            b.citadel ? "" : " inactive"
+          }" style="font-size:.9em"></span>
+          <span data-tip="Click to toggle walls status" class="icon-fort-awesome pointer${
+            b.walls ? "" : " inactive"
+          }" style="font-size:.9em"></span>
+          <span data-tip="Click to toggle plaza status" class="icon-store pointer${
+            b.plaza ? "" : " inactive"
+          }" style="font-size:.9em"></span>
+          <span data-tip="Click to toggle temple status" class="icon-chess-bishop pointer${
+            b.temple ? "" : " inactive"
+          }" style="font-size:.9em"></span>
+          <span data-tip="Click to toggle shanty status" class="icon-campground pointer${
+            b.shanty ? "" : " inactive"
           }" style="font-size:.9em"></span>
         </div>
         <span data-tip="Edit burg" class="icon-pencil"></span>

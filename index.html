@@ -4077,7 +4077,7 @@
 
         <div id="brushesSliders" style="display: none">
           <div data-tip="Change brush size. Shortcut: + to increase; – to decrease">
-            <slider-input id="heightmapBrushRadius" min="5" max="100" value="25">
+            <slider-input id="heightmapBrushRadius" min="1" max="100" value="25">
               <div style="width: 3.5em">Radius:</div>
             </slider-input>
           </div>
@@ -4361,7 +4361,7 @@
           <div id="biomesManuallyButtons" style="display: none">
             <div data-tip="Change brush size. Shortcut: + to increase; – to decrease" style="margin-block: 0.3em">
               Brush size:
-              <slider-input id="biomesBrush" min="5" max="100" value="15"></slider-input>
+              <slider-input id="biomesBrush" min="1" max="100" value="15"></slider-input>
             </div>
             <button id="biomesManuallyApply" data-tip="Apply current assignment" class="icon-check"></button>
             <button id="biomesManuallyCancel" data-tip="Cancel assignment" class="icon-cancel"></button>
@@ -4589,7 +4589,7 @@
           <div id="provincesManuallyButtons" style="display: none">
             <div data-tip="Change brush size. Shortcut: + to increase; – to decrease" style="margin-block: 0.3em">
               Brush size:
-              <slider-input id="provincesBrush" min="5" max="100" value="8"></slider-input>
+              <slider-input id="provincesBrush" min="1" max="100" value="8"></slider-input>
             </div>
             <button id="provincesManuallyApply" data-tip="Apply assignment" class="icon-check"></button>
             <button id="provincesManuallyCancel" data-tip="Cancel assignment" class="icon-cancel"></button>
@@ -4881,7 +4881,7 @@
           <div id="zonesManuallyButtons" style="display: none">
             <div data-tip="Change brush size. Shortcut: + to increase; – to decrease" style="margin-block: 0.3em">
               Brush size:
-              <slider-input id="zonesBrush" min="5" max="100" value="8"></slider-input>
+              <slider-input id="zonesBrush" min="1" max="100" value="8"></slider-input>
             </div>
             <div>
               <input id="zonesBrushLandOnly" class="checkbox" type="checkbox" checked />
@@ -4921,6 +4921,7 @@
         <div id="notesLegend" contenteditable="true"></div>
         <div style="margin-top: 0.3em">
           <button id="notesFocus" data-tip="Focus on selected object" class="icon-target"></button>
+          <button id="notesGenerateWithAi" data-tip="Generate note with AI" class="icon-robot"></button>
           <button
             id="notesPin"
             data-tip="Toggle notes box dispay: hide or do not hide the box on mouse move"
@@ -4929,6 +4930,32 @@
           <button id="notesDownload" data-tip="Download notes to PC" class="icon-download"></button>
           <button id="notesUpload" data-tip="Upload notes from PC" class="icon-upload"></button>
           <button id="notesRemove" data-tip="Remove this note" class="icon-trash fastDelete"></button>
+        </div>
+      </div>
+
+      <div id="aiGenerator" class="dialog stable" style="display: none">
+        <div style="display: flex; flex-direction: column; gap: 0.3em; width: 100%">
+          <textarea id="aiGeneratorResult" placeholder="Generated text will appear here" cols="30" rows="10"></textarea>
+          <textarea id="aiGeneratorPrompt" placeholder="Type a prompt here" cols="30" rows="5"></textarea>
+          <div style="display: flex; align-items: center; gap: 1em">
+            <label for="aiGeneratorModel"
+              >Model:
+              <select id="aiGeneratorModel"></select>
+            </label>
+
+            <label for="aiGeneratorKey"
+              >Key:
+              <input id="aiGeneratorKey" placeholder="Enter OpenAI API key" class="icon-key" />
+              <a
+                href="https://platform.openai.com/account/api-keys"
+                target="_blank"
+                rel="noreferrer"
+                class="icon-help-circled"
+                style="text-decoration: none"
+                data-tip="Get the key at OpenAI website. The key will be stored in your browser and send to OpenAI API directly. The Map Genenerator doesn't store the key or any generated data"
+              ></a>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -7999,7 +8026,7 @@
     <script src="config/heightmap-templates.js"></script>
     <script src="config/precreated-heightmaps.js"></script>
     <script src="modules/heightmap-generator.js?v=1.99.00"></script>
-    <script src="modules/ocean-layers.js?v=1.99.00"></script>
+    <script src="modules/ocean-layers.js?v=1.99.07"></script>
     <script src="modules/river-generator.js?v=1.99.05"></script>
     <script src="modules/lakes.js?v=1.99.00"></script>
     <script src="modules/biomes.js?v=1.99.00"></script>
@@ -8026,9 +8053,9 @@
     <script src="main.js?v=1.99.00"></script>
 
     <script defer src="modules/relief-icons.js?v=1.99.05"></script>
-    <script defer src="modules/ui/style.js?v=1.99.05"></script>
+    <script defer src="modules/ui/style.js?v=1.99.08"></script>
     <script defer src="modules/ui/editors.js?v=1.99.05"></script>
-    <script defer src="modules/ui/tools.js?v=1.99.00"></script>
+    <script defer src="modules/ui/tools.js?v=1.99.06"></script>
     <script defer src="modules/ui/world-configurator.js?v=1.99.00"></script>
     <script defer src="modules/ui/heightmap-editor.js?v=1.99.05"></script>
     <script defer src="modules/ui/provinces-editor.js?v=1.99.05"></script>
@@ -8048,7 +8075,8 @@
     <script defer src="modules/ui/relief-editor.js?v=1.99.00"></script>
     <script defer src="modules/ui/burg-editor.js?v=1.99.05"></script>
     <script defer src="modules/ui/units-editor.js?v=1.99.05"></script>
-    <script defer src="modules/ui/notes-editor.js?v=1.99.00"></script>
+    <script defer src="modules/ui/notes-editor.js?v=1.99.06"></script>
+    <script defer src="modules/ui/ai-generator.js?v=1.99.06"></script>
     <script defer src="modules/ui/diplomacy-editor.js?v=1.99.00"></script>
     <script defer src="modules/ui/zones-editor.js?v=1.99.00"></script>
     <script defer src="modules/ui/burgs-overview.js?v=1.99.05"></script>
@@ -8068,7 +8096,7 @@
     <script defer src="libs/rgbquant.min.js"></script>
     <script defer src="libs/jquery.ui.touch-punch.min.js"></script>
     <script defer src="modules/io/save.js?v=1.99.00"></script>
-    <script defer src="modules/io/load.js?v=1.99.05"></script>
+    <script defer src="modules/io/load.js?v=1.99.07"></script>
     <script defer src="modules/io/cloud.js?v=1.99.00"></script>
     <script defer src="modules/io/export.js?v=1.99.00"></script>
   </body>

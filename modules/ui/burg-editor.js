@@ -105,7 +105,7 @@ function editBurg(id) {
       select.options.add(new Option(this.id, this.id, false, this.id === group));
     });
 
-    // set emlem image
+    // set emblem image
     const coaID = "burgCOA" + id;
     COArenderer.trigger(coaID, b.coa);
     byId("burgEmblem").setAttribute("href", "#" + coaID);

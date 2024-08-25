@@ -70,17 +70,28 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
 
     body.innerHTML = "";
     let lines = "";
+    let totalCapitals = 0;
     let totalPopulation = 0;
 
     for (const b of filtered) {
       const population = b.population * populationRate * urbanization;
       totalPopulation += population;
-      const type = b.capital && b.port ? "a-capital-port" : b.capital ? "c-capital" : b.port ? "p-port" : "z-burg";
+      totalCapitals = pack.burgs.filter( x => x.capital ).length;
+      // const type = b.capital && b.port ? "a-capital-port" : b.capital ? "c-capital" : b.port ? "p-port" : "z-burg";
       const state = pack.states[b.state].name;
       const prov = pack.cells.province[b.cell];
       const province = prov ? pack.provinces[prov].name : "";
       const culture = pack.cultures[b.culture].name;
       const burgGroup = burgIcons.select('[data-id="3"]').node()?.parentNode.id;
+      const capital = b.capital ? "capital" : "not";
+      const port = b.port ? "port" : "not";
+      const citadel = b.citadel ? "citadel" : "not";
+      const walls = b.walls ? "walls" : "not";
+      const plaza = b.plaza ? "plaza" : "not";
+      const temple = b.temple ? "temple" : "not";
+      const shanty = b.shanty ? "shanty" : "not";
+
+      // data-type="${type}"
 
       lines += /* html */ `<div
         class="states"
@@ -90,11 +101,17 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
         data-province="${province}"
         data-culture="${culture}"
         data-population=${population}
-        data-burgGroup=${burgGroup}
-        data-type="${type}"
+        data-burggroup="${burgGroup}"
+        data-capital="${capital}"
+        data-port="${port}"
+        data-citadel="${citadel}"
+        data-walls="${walls}"
+        data-plaza="${plaza}"
+        data-temple="${temple}"
+        data-shanty="${shanty}"
       >
         <span data-tip="Click to zoom into view" class="icon-dot-circled pointer"></span>
-        <input data-tip="Burg name. Click and type to change" class="burgName" value="${
+        <input data-tip="Burg name. Click and write to change" class="burgName" value="${
           b.name
         }" autocorrect="off" spellcheck="false" />
         <input data-tip="Burg province" class="burgState" value="${province}" disabled />
@@ -103,32 +120,32 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
           ${getCultureOptions(b.culture)}
         </select>
         <span data-tip="Burg population" class="icon-male"></span>
-        <input data-tip="Burg population. Type to change" class="burgPopulation" value=${si(population)} />
-        <input data-tip="Burg group. Type to change" class="burgPopulation" value=${burgGroup} />
-        <div class="burgFeatures" style="width: 8.2em;">
-          <span
+        <input data-tip="Burg population. Write to change" class="burgPopulation" value=${si(population)} />
+        <input data-tip="Burg group. Click and write to change" class="burgGroup" value=${burgGroup} autocorrect="off" spellcheck="false" />
+        
+        <span
             data-tip="${b.capital ? " This burg is a state capital" : "Click to assign a capital status"}"
-            class="icon-star-empty${b.capital ? "" : " inactive pointer"}"
+            class="icon-star-empty${b.capital ? "" : " inactive pointer"}" style="width: 1.9em;"
           ></span>
-          <span data-tip="Click to toggle port status" class="icon-anchor pointer${
+        <span data-tip="Click to toggle port status" class="icon-anchor pointer${
             b.port ? "" : " inactive"
-          }" style="font-size:.9em"></span>
-          <span data-tip="Click to toggle citadel status" class="icon-chess-rook pointer${
+          }" style="font-size:.9em; width: 1.9em;"></span>
+        <span data-tip="Click to toggle citadel status" class="icon-chess-rook pointer${
             b.citadel ? "" : " inactive"
-          }" style="font-size:.9em"></span>
-          <span data-tip="Click to toggle walls status" class="icon-fort-awesome pointer${
+          }" style="font-size:.9em; width: 1.9em;"></span>
+        <span data-tip="Click to toggle walls status" class="icon-fort-awesome pointer${
             b.walls ? "" : " inactive"
-          }" style="font-size:.9em"></span>
-          <span data-tip="Click to toggle plaza status" class="icon-store pointer${
+          }" style="font-size:.9em; width: 1.9em;"></span>
+        <span data-tip="Click to toggle plaza status" class="icon-store pointer${
             b.plaza ? "" : " inactive"
-          }" style="font-size:.9em"></span>
-          <span data-tip="Click to toggle temple status" class="icon-chess-bishop pointer${
+          }" style="font-size:.9em; width: 1.9em;"></span>
+        <span data-tip="Click to toggle temple status" class="icon-chess-bishop pointer${
             b.temple ? "" : " inactive"
-          }" style="font-size:.9em"></span>
-          <span data-tip="Click to toggle shanty status" class="icon-campground pointer${
+          }" style="font-size:.9em; width: 1.9em;"></span>
+        <span data-tip="Click to toggle shanty status" class="icon-campground pointer${
             b.shanty ? "" : " inactive"
-          }" style="font-size:.9em"></span>
-        </div>
+          }" style="font-size:.9em; width: 3em;"></span>
+        
         <span data-tip="Edit burg" class="icon-pencil"></span>
         <span class="locks pointer ${
           b.lock ? "icon-lock" : "icon-lock-open inactive"
@@ -141,6 +158,7 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
 
     // update footer
     burgsFooterBurgs.innerHTML = filtered.length;
+    burgsFooterCapitals.innerHTML = totalCapitals;
     burgsFooterPopulation.innerHTML = filtered.length ? si(totalPopulation / filtered.length) : 0;
 
     // add listeners
@@ -149,6 +167,7 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
     body.querySelectorAll("div > input.burgName").forEach(el => el.addEventListener("input", changeBurgName));
     body.querySelectorAll("div > span.icon-dot-circled").forEach(el => el.addEventListener("click", zoomIntoBurg));
     body.querySelectorAll("div > select.stateCulture").forEach(el => el.addEventListener("change", changeBurgCulture));
+    body.querySelectorAll("div > input.burgGroup").forEach(el => el.addEventListener("input", changeBurgGroup));
     body
       .querySelectorAll("div > input.burgPopulation")
       .forEach(el => el.addEventListener("change", changeBurgPopulation));
@@ -156,6 +175,12 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
       .querySelectorAll("div > span.icon-star-empty")
       .forEach(el => el.addEventListener("click", toggleCapitalStatus));
     body.querySelectorAll("div > span.icon-anchor").forEach(el => el.addEventListener("click", togglePortStatus));
+    // body.querySelectorAll("div > span.icon-anchor").forEach(el => el.addEventListener("click", toggleFeature));
+    body.querySelectorAll("div > span.icon-chess-rook").forEach(el => el.addEventListener("click", toggleCitadelStatus));
+    // body.querySelectorAll("div > span.icon-fort-awesome").forEach(el => el.addEventListener("click", toggleWallsStatus));
+    // body.querySelectorAll("div > span.icon-store").forEach(el => el.addEventListener("click", togglePlazaStatus));
+    // body.querySelectorAll("div > span.icon-chess-bishop").forEach(el => el.addEventListener("click", toggleTempleStatus));
+    // body.querySelectorAll("div > span.icon-campground").forEach(el => el.addEventListener("click", toggleShantyStatus));
     body.querySelectorAll("div > span.locks").forEach(el => el.addEventListener("click", toggleBurgLockStatus));
     body.querySelectorAll("div > span.icon-pencil").forEach(el => el.addEventListener("click", openBurgEditor));
     body.querySelectorAll("div > span.icon-trash-empty").forEach(el => el.addEventListener("click", triggerBurgRemove));
@@ -205,6 +230,13 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
     this.parentNode.dataset.culture = pack.cultures[v].name;
   }
 
+  function changeBurgGroup() {
+    if (this.value == "") tip("Please provide a name", false, "error");
+    const burg = +this.parentNode.dataset.id;
+    pack.burgs[burg].burgGroup = this.value;
+    this.parentNode.dataset.burgGroup = this.value;
+  }
+
   function changeBurgPopulation() {
     const burg = +this.parentNode.dataset.id;
     if (this.value == "" || isNaN(+this.value)) {
@@ -233,6 +265,31 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
     if (this.classList.contains("inactive")) this.classList.remove("inactive");
     else this.classList.add("inactive");
   }
+
+  function toggleCitadelStatus() {
+    const burg = +this.parentNode.parentNode.dataset.id;
+    toggleCitadel(burg);
+    if (this.classList.contains("inactive")) this.classList.remove("inactive");
+    else this.classList.add("inactive");
+  }
+
+  /* This is used in burg-editor.js to toggle several burg features
+  
+  function toggleFeature() {
+    const id = +elSelected.attr("data-id");
+    const burg = pack.burgs[id];
+    const feature = this.dataset.feature;
+    const turnOn = this.classList.contains("inactive");
+    if (feature === "port") togglePort(id);
+    else if (feature === "capital") toggleCapital(id);
+    else burg[feature] = +turnOn;
+    if (burg[feature]) this.classList.remove("inactive");
+    else if (!burg[feature]) this.classList.add("inactive");
+    byId("burgEditAnchorStyle").style.display = "none";
+    burgsOverviewAddLines();
+    updateBurgPreview(burg);
+  }   */
+
 
   function toggleBurgLockStatus() {
     const burgId = +this.parentNode.dataset.id;

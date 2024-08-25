@@ -5245,7 +5245,7 @@
       </div>
 
       <div id="burgsOverview" class="dialog stable" style="display: none">
-        <div id="burgsHeader" class="header" style="grid-template-columns: 8em 6em 6em 7em 7em 5em 10em">
+        <div id="burgsHeader" class="header" style="grid-template-columns: 8em 6em 6em 7em 7em 7em 2em 2em 2em 2em 2em 2em 2em 4em">
           <div data-tip="Click to sort by burg name" class="sortable alphabetically" data-sortby="name">Burg</div>
           <div data-tip="Click to sort by province name" class="sortable alphabetically" data-sortby="province">
             Province
@@ -5261,8 +5261,14 @@
           >
             Population
           </div>
-          <div data-tip="Click to sort by burg group" class="sortable alphabetically" data-sortby="state">Group</div>
-          <div data-tip="Click to sort by burg features" class="sortable alphabetically" data-sortby="type">Features&nbsp;</div>
+          <div data-tip="Click to sort by burg group" class="sortable alphabetically" data-sortby="burgGroup">Group</div>
+          <div data-tip="Click to sort by capital status" class="sortable alphabetically" data-sortby="capital">C</div>
+          <div data-tip="Click to sort by port status" class="sortable alphabetically" data-sortby="port">P</div>
+          <div data-tip="Click to sort by citadel status" class="sortable alphabetically" data-sortby="citadel">Ci</div>
+          <div data-tip="Click to sort by walls status" class="sortable alphabetically" data-sortby="walls">W</div>
+          <div data-tip="Click to sort by plaza status" class="sortable alphabetically" data-sortby="plaza">P</div>
+          <div data-tip="Click to sort by temple status" class="sortable alphabetically" data-sortby="temple">T</div>
+          <div data-tip="Click to sort by shanty status" class="sortable alphabetically" data-sortby="shanty">S</div>
         </div>
 
         <div id="burgsBody" class="table"></div>
@@ -5278,6 +5284,10 @@
         <div id="burgsFooter" class="totalLine">
           <div data-tip="Burgs displayed" style="margin-left: 4px">
             Burgs:&nbsp;<span id="burgsFooterBurgs">0</span>
+          </div>
+
+          <div data-tip="Total of state capitals" style="margin-left: 14px">
+            Capitals:&nbsp;<span id="burgsFooterCapitals">0</span>
           </div>
 
           <div data-tip="Average population" style="margin-left: 14px">

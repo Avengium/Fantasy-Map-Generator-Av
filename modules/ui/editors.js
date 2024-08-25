@@ -315,6 +315,17 @@ function togglePort(burg) {
     .attr("height", size);
 }
 
+function toggleCitadel(burg) {
+    // if a burg with same ID was found, remove citadel
+  const anchor = document.querySelector("#anchors [data-id='" + burg + "']");
+  if (anchor) anchor.remove();
+  const b = pack.burgs[burg];
+  if (b.citadel) {
+    b.citadel = 0;
+    return;
+  } // not a citadel anymore
+}
+
 function getBurgLink(burg) {
   if (burg.link) return burg.link;
 

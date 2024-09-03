@@ -77,21 +77,20 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
       const population = b.population * populationRate * urbanization;
       totalPopulation += population;
       totalCapitals = pack.burgs.filter( x => x.capital ).length;
-      // const type = b.capital && b.port ? "a-capital-port" : b.capital ? "c-capital" : b.port ? "p-port" : "z-burg";
       const state = pack.states[b.state].name;
       const prov = pack.cells.province[b.cell];
       const province = prov ? pack.provinces[prov].name : "";
       const culture = pack.cultures[b.culture].name;
-      const burgGroup = burgIcons.select('[data-id="3"]').node()?.parentNode.id;
+      const burgGroup = burgIcons.select(`[data-id="${b.i}"]`).node()?.parentNode.id || "";
       const capital = b.capital ? "capital" : "not";
       const port = b.port ? "port" : "not";
-      const citadel = b.citadel ? "citadel" : "not";
-      const walls = b.walls ? "walls" : "not";
-      const plaza = b.plaza ? "plaza" : "not";
-      const temple = b.temple ? "temple" : "not";
-      const shanty = b.shanty ? "shanty" : "not";
 
-      // data-type="${type}"
+      const features = ["citadel", "walls", "plaza", "temple", "shanty"];
+      features.forEach(feature => {
+        body.querySelectorAll(`div > span[data-feature="${feature}"]`).forEach(el => 
+          el.addEventListener("click", toggleFeature)
+        );
+      });
 
       lines += /* html */ `<div
         class="states"
@@ -104,11 +103,7 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
         data-burggroup="${burgGroup}"
         data-capital="${capital}"
         data-port="${port}"
-        data-citadel="${citadel}"
-        data-walls="${walls}"
-        data-plaza="${plaza}"
-        data-temple="${temple}"
-        data-shanty="${shanty}"
+        ${features.map(feature => `data-${feature}="${b[feature] ? 1 : 0}"`).join(" ")}
       >
         <span data-tip="Click to zoom into view" class="icon-dot-circled pointer"></span>
         <input data-tip="Burg name. Click and write to change" class="burgName" value="${
@@ -130,21 +125,11 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
         <span data-tip="Click to toggle port status" class="icon-anchor pointer${
             b.port ? "" : " inactive"
           }" style="font-size:.9em; width: 1.9em;"></span>
-        <span data-tip="Click to toggle citadel status" class="icon-chess-rook pointer${
-            b.citadel ? "" : " inactive"
-          }" style="font-size:.9em; width: 1.9em;"></span>
-        <span data-tip="Click to toggle walls status" class="icon-fort-awesome pointer${
-            b.walls ? "" : " inactive"
-          }" style="font-size:.9em; width: 1.9em;"></span>
-        <span data-tip="Click to toggle plaza status" class="icon-store pointer${
-            b.plaza ? "" : " inactive"
-          }" style="font-size:.9em; width: 1.9em;"></span>
-        <span data-tip="Click to toggle temple status" class="icon-chess-bishop pointer${
-            b.temple ? "" : " inactive"
-          }" style="font-size:.9em; width: 1.9em;"></span>
-        <span data-tip="Click to toggle shanty status" class="icon-campground pointer${
-            b.shanty ? "" : " inactive"
-          }" style="font-size:.9em; width: 3em;"></span>
+        ${features.map(feature => `
+        <span data-tip="Click to toggle ${feature} status" class="icon-${getFeatureIcon(feature)} pointer${
+          b[feature] ? "" : " inactive"
+        }" style="font-size:.9em; width: 1.9em;" data-feature="${feature}"></span>
+        `).join("")}
         
         <span data-tip="Edit burg" class="icon-pencil"></span>
         <span class="locks pointer ${
@@ -175,12 +160,7 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
       .querySelectorAll("div > span.icon-star-empty")
       .forEach(el => el.addEventListener("click", toggleCapitalStatus));
     body.querySelectorAll("div > span.icon-anchor").forEach(el => el.addEventListener("click", togglePortStatus));
-    // body.querySelectorAll("div > span.icon-anchor").forEach(el => el.addEventListener("click", toggleFeature));
-    body.querySelectorAll("div > span.icon-chess-rook").forEach(el => el.addEventListener("click", toggleCitadelStatus));
-    // body.querySelectorAll("div > span.icon-fort-awesome").forEach(el => el.addEventListener("click", toggleWallsStatus));
-    // body.querySelectorAll("div > span.icon-store").forEach(el => el.addEventListener("click", togglePlazaStatus));
-    // body.querySelectorAll("div > span.icon-chess-bishop").forEach(el => el.addEventListener("click", toggleTempleStatus));
-    // body.querySelectorAll("div > span.icon-campground").forEach(el => el.addEventListener("click", toggleShantyStatus));
+    body.querySelectorAll("div > span[data-feature]").forEach(el => el.addEventListener("click", toggleFeature));
     body.querySelectorAll("div > span.locks").forEach(el => el.addEventListener("click", toggleBurgLockStatus));
     body.querySelectorAll("div > span.icon-pencil").forEach(el => el.addEventListener("click", openBurgEditor));
     body.querySelectorAll("div > span.icon-trash-empty").forEach(el => el.addEventListener("click", triggerBurgRemove));
@@ -253,43 +233,62 @@ function overviewBurgs(settings = {stateId: null, cultureId: null}) {
     burgsFooterPopulation.innerHTML = si(d3.mean(population));
   }
 
-  function toggleCapitalStatus() {
-    const burg = +this.parentNode.parentNode.dataset.id;
-    toggleCapital(burg);
+  function toggleCapitalStatus(event) {
+    const burgId = +event.target.closest('.states').dataset.id;
+    if (isNaN(burgId) || burgId <= 0) {
+      console.error("Invalid burg ID:", burgId);
+      return;
+    }
+    toggleCapital(burgId);
     burgsOverviewAddLines();
   }
 
   function togglePortStatus() {
-    const burg = +this.parentNode.parentNode.dataset.id;
-    togglePort(burg);
+    const burgId = +this.closest('.states').dataset.id;
+    if (isNaN(burgId) || burgId <= 0) {
+      console.error("Invalid burg ID:", burgId);
+      return;
+    }
+    togglePort(burgId);
     if (this.classList.contains("inactive")) this.classList.remove("inactive");
     else this.classList.add("inactive");
   }
 
-  function toggleCitadelStatus() {
-    const burg = +this.parentNode.parentNode.dataset.id;
-    toggleCitadel(burg);
-    if (this.classList.contains("inactive")) this.classList.remove("inactive");
-    else this.classList.add("inactive");
+  function getFeatureIcon(feature) {
+    const iconMap = {
+      citadel: "chess-rook",
+      walls: "fort-awesome",
+      plaza: "store",
+      temple: "chess-bishop",
+      shanty: "campground"
+    };
+    return iconMap[feature] || feature;
   }
 
-  /* This is used in burg-editor.js to toggle several burg features
-  
-  function toggleFeature() {
-    const id = +elSelected.attr("data-id");
-    const burg = pack.burgs[id];
-    const feature = this.dataset.feature;
-    const turnOn = this.classList.contains("inactive");
-    if (feature === "port") togglePort(id);
-    else if (feature === "capital") toggleCapital(id);
-    else burg[feature] = +turnOn;
-    if (burg[feature]) this.classList.remove("inactive");
-    else if (!burg[feature]) this.classList.add("inactive");
-    byId("burgEditAnchorStyle").style.display = "none";
-    burgsOverviewAddLines();
-    updateBurgPreview(burg);
-  }   */
-
+    function toggleFeature() {
+      const burgId = +this.closest('.states').dataset.id;
+      if (isNaN(burgId) || burgId <= 0) {
+        console.error("Invalid burg ID:", burgId);
+        return;
+      }
+      
+      const feature = this.dataset.feature;
+      const burg = pack.burgs[burgId];
+      if (!burg) {
+        console.error("Burg not found:", burgId);
+        return;
+      }
+      
+      burg[feature] = burg[feature] ? 0 : 1;
+      
+      if (this.classList.contains("inactive")) {
+        this.classList.remove("inactive");
+      } else {
+        this.classList.add("inactive");
+      }
+      
+      burgsOverviewAddLines();
+    }
 
   function toggleBurgLockStatus() {
     const burgId = +this.parentNode.dataset.id;

@@ -168,6 +168,7 @@ function showMapTooltip(point, e, i, g) {
     if (burgsOverview?.offsetParent) highlightEditorLine(burgsOverview, burg, 5000);
     return;
   }
+
   if (group === "labels") return tip("Click to edit the Label");
 
   if (group === "markers") return tip("Click to edit the Marker. Hold Shift to not close the assosiated note");
@@ -199,9 +200,11 @@ function showMapTooltip(point, e, i, g) {
   if (group === "coastline") return tip("Click to edit the coastline");
 
   if (group === "zones") {
-    const zone = path[path.length - 8];
-    tip(zone.dataset.description);
-    if (zonesEditor?.offsetParent) highlightEditorLine(zonesEditor, zone.id, 5000);
+    const element = path[path.length - 8];
+    const zoneId = +element.dataset.id;
+    const zone = pack.zones.find(zone => zone.i === zoneId);
+    tip(zone.name);
+    if (zonesEditor?.offsetParent) highlightEditorLine(zonesEditor, zoneId, 5000);
     return;
   }
 
@@ -426,17 +429,19 @@ function highlightEmblemElement(type, el) {
 
 // assign lock behavior
 document.querySelectorAll("[data-locked]").forEach(function (e) {
-  e.addEventListener("mouseover", function (event) {
+  e.addEventListener("mouseover", e => {
+    e.stopPropagation();
     if (this.className === "icon-lock")
       tip("Click to unlock the option and allow it to be randomized on new map generation");
     else tip("Click to lock the option and always use the current value on new map generation");
-    event.stopPropagation();
   });
 
   e.addEventListener("click", function () {
-    const id = this.id.slice(5);
-    if (this.className === "icon-lock") unlock(id);
-    else lock(id);
+    const fn = this.className === "icon-lock" ? unlock : lock;
+    const ids = this.dataset.ids.split(",");
+
+    if (ids.length) ids.forEach(fn);
+    else fn(this.id.slice(5));
   });
 });
 

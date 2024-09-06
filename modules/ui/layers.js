@@ -40,7 +40,14 @@ function getDefaultPresets() {
     provinces: ["toggleBorders", "toggleIcons", "toggleProvinces", "toggleRivers", "toggleScaleBar", "toggleVignette"],
     biomes: ["toggleBiomes", "toggleIce", "toggleRivers", "toggleScaleBar", "toggleVignette"],
     heightmap: ["toggleHeight", "toggleRivers", "toggleVignette"],
-    physical: ["toggleCoordinates", "toggleHeight", "toggleIce", "toggleRivers", "toggleScaleBar", "toggleVignette"],
+    physical: [
+      "toggleCoordinates",
+      "toggleHeight",
+      "toggleIce",
+      "toggleRivers",
+      "toggleScaleBar",
+      "toggleVignette"
+    ],
     poi: [
       "toggleBorders",
       "toggleHeight",
@@ -164,6 +171,7 @@ function getCurrentPreset() {
 // run on map regeneration
 function restoreLayers() {
   if (layerIsOn("toggleTexture")) drawTexture();
+  if (layerIsOn("toggleIsolines")) drawIsolines();
   if (layerIsOn("toggleHeight")) drawHeightmap();
   if (layerIsOn("toggleCells")) drawCells();
   if (layerIsOn("toggleGrid")) drawGrid();
@@ -351,6 +359,67 @@ function drawHeightmap() {
 
 function getColor(value, scheme = getColorScheme("bright")) {
   return scheme(1 - (value < 20 ? value - 5 : value) / 100);
+}
+
+// let isolines;
+
+function toggleIsolines(event) {
+  if (!layerIsOn("toggleHeight")) {
+    tip("Heightmap layer should be turned on", false, "error");
+    return;
+  }
+
+  if (!isolines) {
+    isolines = viewbox.insert("g", "#terrain").attr("id", "isolines");
+  }
+
+  if (!isolines.selectAll("path").size()) {
+    turnButtonOn("toggleIsolines");
+    drawIsolines();
+    if (event && isCtrlClick(event)) editStyle("isolines");
+  } else {
+    if (event && isCtrlClick(event)) {
+      editStyle("isolines");
+      return;
+    }
+    isolines.selectAll("path").remove();
+    turnButtonOff("toggleIsolines");
+  }
+}
+
+function drawIsolines() {
+  if (!isolines) return;  // Safety check
+  isolines.selectAll("path").remove();
+
+  const isolines = viewbox.select("#isolines");
+  isolines.selectAll("*").remove();
+
+  const el = getEl();
+  const heights = grid.cells.h;
+  const min = d3.min(heights);
+  const max = d3.max(heights);
+
+  const interval = +el.attr("data-interval") || 10;
+  const stroke = el.attr("stroke") || "#5a5a5a";
+  const strokeWidth = +el.attr("stroke-width") || 0.5;
+  const opacity = +el.attr("opacity") || 1;
+
+  const contours = d3.contours()
+    .size([grid.cellsX, grid.cellsY])
+    .thresholds(d3.range(min, max, interval))
+    (heights);
+
+  const path = d3.geoPath();
+
+  isolines.selectAll("path")
+    .data(contours)
+    .enter()
+    .append("path")
+    .attr("d", path)
+    .attr("fill", "none")
+    .attr("stroke", stroke)
+    .attr("stroke-width", strokeWidth)
+    .attr("opacity", opacity);
 }
 
 function toggleTemp(event) {

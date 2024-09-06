@@ -91,7 +91,7 @@ function selectStyleElement() {
   }
 
   // opacity
-  if (!["landmass", "ocean", "regions", "legend"].includes(styleElement)) {
+  if (!["landmass", "legend", "ocean", "regions"].includes(styleElement)) {
     styleOpacity.style.display = "block";
     styleOpacityInput.value = el.attr("opacity") || 1;
   }
@@ -112,19 +112,20 @@ function selectStyleElement() {
   if (
     [
       "armies",
-      "routes",
-      "lakes",
       "borders",
-      "cults",
-      "relig",
       "cells",
       "coastline",
-      "prec",
+      "coordinates",
+      "cults",
+      "gridOverlay",
       "ice",
       "icons",
-      "coordinates",
+      "isolines",
+      "lakes",
+      "prec",
+      "relig",
+      "routes",
       "zones",
-      "gridOverlay"
     ].includes(styleElement)
   ) {
     styleStroke.style.display = "block";
@@ -183,6 +184,14 @@ function selectStyleElement() {
     styleHeightmapSkip.value = el.attr("skip");
     styleHeightmapSimplification.value = el.attr("relax");
     styleHeightmapCurve.value = el.attr("curve");
+  }
+
+  if (styleElement === "isolines") {
+    // styleStrokeInput.value = styleStrokeOutput.value = el.attr("stroke") || "#3a3a3a";
+    // styleStrokeWidthInput.value = el.attr("stroke-width") || 0;
+    // already included? styleOpacityInput.value = el.attr("opacity") || 1;
+    styleIsolines.style.display = "block";
+    styleIsolinesInterval.value = el.attr("data-interval") || 10;
   }
 
   if (styleElement === "markers") {
@@ -427,11 +436,13 @@ styleStrokeInput.on("input", function () {
   styleStrokeOutput.value = this.value;
   getEl().attr("stroke", this.value);
   if (styleElementSelect.value === "gridOverlay" && layerIsOn("toggleGrid")) drawGrid();
+  if (styleElementSelect.value === "isolines" && layerIsOn("toggleIsolines")) drawIsolines();
 });
 
 styleStrokeWidthInput.on("input", e => {
   getEl().attr("stroke-width", e.target.value);
   if (styleElementSelect.value === "gridOverlay" && layerIsOn("toggleGrid")) drawGrid();
+  if (styleElementSelect.value === "isolines" && layerIsOn("toggleIsolines")) drawIsolines();
 });
 
 styleLetterSpacingInput.on("input", e => {
@@ -522,6 +533,12 @@ styleGridShiftX.on("input", function () {
 styleGridShiftY.on("input", function () {
   getEl().attr("dy", this.value);
   if (layerIsOn("toggleGrid")) drawGrid();
+});
+
+styleIsolinesInterval.on("input", function() {
+  const interval = +this.value;
+  getEl().attr("data-interval", interval);
+  drawIsolines();
 });
 
 styleRescaleMarkers.on("change", function () {

@@ -90,6 +90,7 @@ let fogging = viewbox
   .attr("id", "fogging")
   .style("display", "none");
 let ruler = viewbox.append("g").attr("id", "ruler").style("display", "none");
+let isolines = viewbox.append("g").attr("id", "isolines").style("display", "none");
 let debug = viewbox.append("g").attr("id", "debug");
 
 lakes.append("g").attr("id", "freshwater");
@@ -104,6 +105,8 @@ coastline.append("g").attr("id", "lake_island");
 
 terrs.append("g").attr("id", "oceanHeights");
 terrs.append("g").attr("id", "landHeights");
+
+isolines.append("g").attr("id", "contours");
 
 labels.append("g").attr("id", "states");
 labels.append("g").attr("id", "addedLabels");

@@ -313,6 +313,7 @@ async function parseLoadedData(data, mapVersion) {
       compass = viewbox.select("#compass");
       rivers = viewbox.select("#rivers");
       terrain = viewbox.select("#terrain");
+      isolines = viewbox.select("#isolines");
       relig = viewbox.select("#relig");
       cults = viewbox.select("#cults");
       regions = viewbox.select("#regions");
@@ -419,6 +420,7 @@ async function parseLoadedData(data, mapVersion) {
 
       // turn on active layers
       if (hasChild(texture, "image")) turnOn("toggleTexture");
+      if (hasChildren(isolines)) turnOn("toggleIsolines");
       if (hasChildren(terrs)) turnOn("toggleHeight");
       if (hasChildren(biomes)) turnOn("toggleBiomes");
       if (hasChildren(cells)) turnOn("toggleCells");

@@ -361,8 +361,6 @@ function getColor(value, scheme = getColorScheme("bright")) {
   return scheme(1 - (value < 20 ? value - 5 : value) / 100);
 }
 
-// let isolines;
-
 function toggleIsolines(event) {
   console.log("toggleIsolines called");
   if (!isolines.selectAll("path").size()) {
@@ -382,12 +380,12 @@ function toggleIsolines(event) {
 }
 
 function drawIsolines() {
+  console.log("drawIsolines function called");
   isolines.selectAll("*").remove();
 
-  const el = getEl(); // Asumiendo que getEl() está definido y devuelve el elemento correcto
+  const el = getEl();
 
-  // Asegúrate de que grid.cells.h esté disponible
-  if (!grid.cells || !grid.cells.h) {
+  if (!grid.cells || !grid.cells.h || !grid.cellsX || !grid.cellsY) {
     console.error("Grid data is not available");
     return;
   }
@@ -401,20 +399,20 @@ function drawIsolines() {
   const strokeWidth = +el.attr("stroke-width") || 0.5;
   const opacity = +el.attr("opacity") || 1;
 
-  // Asegúrate de que grid.cellsX y grid.cellsY estén definidos
-  if (!grid.cellsX || !grid.cellsY) {
-    console.error("Grid dimensions are not available");
-    return;
-  }
-
+  // Generate contours
   const contours = d3.contours()
     .size([grid.cellsX, grid.cellsY])
     .thresholds(d3.range(min, max, interval))
     (heights);
 
+  // Create path generator
   const path = d3.geoPath();
-  console.log(`Drew ${contours.length} isoline paths`);
 
+  // Calculate scale factors
+  const scaleX = graphWidth / grid.cellsX;
+  const scaleY = graphHeight / grid.cellsY;
+
+  // Draw contour lines
   isolines.selectAll("path")
     .data(contours)
     .enter()
@@ -425,9 +423,12 @@ function drawIsolines() {
     .attr("stroke-width", strokeWidth)
     .attr("opacity", opacity);
 
-  // Considera añadir esto para asegurar que las isolíneas sean visibles
+  // Apply transform to the entire isolines group
+  isolines.attr("transform", `translate(0, 0) scale(${scaleX}, ${scaleY})`);
+
+  console.log(`Drew ${contours.length} isoline paths`);
+
   isolines.raise();
-  console.log("Isolines style:", isolines.attr("style"));
 }
 
 function toggleTemp(event) {

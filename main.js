@@ -48,6 +48,7 @@ let oceanPattern = ocean.append("g").attr("id", "oceanPattern");
 let lakes = viewbox.append("g").attr("id", "lakes");
 let landmass = viewbox.append("g").attr("id", "landmass");
 let texture = viewbox.append("g").attr("id", "texture");
+let isolines = viewbox.append("g").attr("id", "isolines");
 let terrs = viewbox.append("g").attr("id", "terrs");
 let biomes = viewbox.append("g").attr("id", "biomes");
 let cells = viewbox.append("g").attr("id", "cells");
@@ -90,7 +91,6 @@ let fogging = viewbox
   .attr("id", "fogging")
   .style("display", "none");
 let ruler = viewbox.append("g").attr("id", "ruler").style("display", "none");
-let isolines = viewbox.append("g").attr("id", "isolines").style("display", "none");
 let debug = viewbox.append("g").attr("id", "debug");
 
 lakes.append("g").attr("id", "freshwater");

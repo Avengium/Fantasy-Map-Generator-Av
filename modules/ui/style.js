@@ -187,10 +187,14 @@ function selectStyleElement() {
   }
 
   if (styleElement === "isolines") {
-    // styleStrokeInput.value = styleStrokeOutput.value = el.attr("stroke") || "#3a3a3a";
-    // styleStrokeWidthInput.value = el.attr("stroke-width") || 0;
-    // already included? styleOpacityInput.value = el.attr("opacity") || 1;
     styleIsolines.style.display = "block";
+    styleStroke.style.display = "block";
+    styleStrokeWidth.style.display = "block";
+    styleOpacity.style.display = "block";
+
+    styleStrokeInput.value = styleStrokeOutput.value = el.attr("stroke") || "#5a5a5a";
+    styleStrokeWidthInput.value = el.attr("stroke-width") || 0.5;
+    styleOpacityInput.value = el.attr("opacity") || 1;
     styleIsolinesInterval.value = el.attr("data-interval") || 10;
   }
 

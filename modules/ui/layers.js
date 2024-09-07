@@ -382,7 +382,6 @@ function toggleIsolines(event) {
 }
 
 function drawIsolines() {
-  console.log("drawIsolines function called");
   isolines.selectAll("*").remove();
 
   const el = getEl(); // Asumiendo que getEl() está definido y devuelve el elemento correcto
@@ -428,6 +427,7 @@ function drawIsolines() {
 
   // Considera añadir esto para asegurar que las isolíneas sean visibles
   isolines.raise();
+  console.log("Isolines style:", isolines.attr("style"));
 }
 
 function toggleTemp(event) {

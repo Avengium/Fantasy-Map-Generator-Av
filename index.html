@@ -482,15 +482,6 @@
               onclick="toggleTexture(event)"
             >
               Te<u>x</u>ture
-            </li>
-            <li
-              id="toggleIsolines"
-              data-tip="Isolines: click to toggle, drag to raise or lower the layer. Ctrl + click to edit layer style"
-              data-shortcut="Q"
-              class="buttonoff"
-              onclick="toggleIsolines(event)"
-            >
-              Isolines
             </li> 
             <li
               id="toggleHeight"
@@ -651,6 +642,15 @@
             >
               Ice
             </li>
+            <li
+            id="toggleIsolines"
+            data-tip="Isolines: click to toggle, drag to raise or lower the layer. Ctrl + click to edit layer style"
+            data-shortcut="Q"
+            class="buttonoff"
+            onclick="toggleIsolines(event)"
+          >
+            Isolines
+          </li>
             <li
               id="togglePrec"
               data-tip="Precipitation map: click to toggle, drag to raise or lower the layer. Ctrl + click to edit layer style"
@@ -1277,11 +1277,11 @@
               </tr>
             </tbody>
 
-            <tbody id="styleIsolines" style="display: none;">
-              <tr>
-                <td>Interval:</td>
+            <tbody id="styleIsolines" style="display: none">
+              <tr data-tip="Set interval between isolines. Lower value means more lines">
+                <td>Interval</td>
                 <td>
-                  <input id="styleIsolinesInterval" type="number" min="1" max="100" value="10" />
+                  <slider-input id="styleIsolinesInterval" min="1" max="100" step="1"></slider-input>
                 </td>
               </tr>
             </tbody>
@@ -2065,6 +2065,11 @@
               data-shortcut="Shift + H"
             >
               Heightmap
+            </button>
+            <button
+              id="editIsolinesButton"
+              data-tip="Click to open Isolines customization menu">
+              Isolines
             </button>
             <button id="overviewMarkersButton" data-tip="Click to open Markers Overview" data-shortcut="Shift + K">
               Markers
@@ -5374,6 +5379,20 @@
         </div>
       </div>
 
+      <div id="isolinesMenu" class="dialog" style="display: none;">
+        <div id="isolinesHeader" class="dialog-header">
+          <h3 class="dialog-title">Isolines Options</h3>
+        </div>
+        <div id="isolinesBody" class="dialog-body">
+          <!-- Isoline groups will be dynamically added here -->
+        </div>
+        <div id="isolinesFooter" class="dialog-footer">
+          <button id="regenerateIsolines" data-tip="Regenerate isolines"><i class="icon-cw"></i></button>
+          <button id="isolinesStyleButton" data-tip="Go to isolines style tab"><i class="icon-adjust"></i></button>
+          <button id="toggleIsolineLabels" data-tip="Toggle isoline labels"><i class="icon-font"></i></button>
+        </div>
+      </div>
+
       <div id="routesOverview" class="dialog stable" style="display: none">
         <div id="routesHeader" class="header" style="grid-template-columns: 17em 8em 8em">
           <div data-tip="Click to sort by route name" class="sortable alphabetically" data-sortby="name">
@@ -8077,7 +8096,6 @@
     <script src="config/heightmap-templates.js"></script>
     <script src="config/precreated-heightmaps.js"></script>
     <script src="modules/heightmap-generator.js?v=1.99.00"></script>
-    <script src="modules/isolines.js?v=1.104.00"></script>
     <script src="modules/ocean-layers.js?v=1.100.00"></script>
     <script src="modules/river-generator.js?v=1.99.05"></script>
     <script src="modules/lakes.js?v=1.99.00"></script>
@@ -8111,6 +8129,7 @@
     <script defer src="modules/ui/tools.js?v=1.100.00"></script>
     <script defer src="modules/ui/world-configurator.js?v=1.99.00"></script>
     <script defer src="modules/ui/heightmap-editor.js?v=1.100.00"></script>
+    <script defer src="modules/ui/isolines.js?v=1.103.5"></script>
     <script defer src="modules/ui/provinces-editor.js?v=1.99.05"></script>
     <script defer src="modules/ui/biomes-editor.js?v=1.99.05"></script>
     <script defer src="modules/ui/namesbase-editor.js?v=1.99.00"></script>

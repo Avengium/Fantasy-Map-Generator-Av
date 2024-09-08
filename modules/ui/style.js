@@ -136,7 +136,17 @@ function selectStyleElement() {
 
   // stroke dash
   if (
-    ["routes", "borders", "temperature", "legend", "population", "coordinates", "zones", "gridOverlay"].includes(
+    [
+      "borders",
+      "coordinates",
+      "gridOverlay",
+      "isolines",
+      "legend",
+      "population",
+      "routes",
+      "temperature",
+      "zones"
+    ].includes(
       styleElement
     )
   ) {
@@ -187,14 +197,11 @@ function selectStyleElement() {
   }
 
   if (styleElement === "isolines") {
-    styleIsolines.style.display = "block";
+    styleOpacity.style.display = "block";
     styleStroke.style.display = "block";
     styleStrokeWidth.style.display = "block";
-    styleOpacity.style.display = "block";
-
-    styleStrokeInput.value = styleStrokeOutput.value = el.attr("stroke") || "#5a5a5a";
-    styleStrokeWidthInput.value = el.attr("stroke-width") || 0.5;
-    styleOpacityInput.value = el.attr("opacity") || 1;
+    
+    styleIsolines.style.display = "block";
     styleIsolinesInterval.value = el.attr("data-interval") || 10;
   }
 
@@ -361,7 +368,12 @@ function selectStyleElement() {
 
   // update group options
   styleGroupSelect.options.length = 0; // remove all options
-  if (["routes", "labels", "coastline", "lakes", "anchors", "burgIcons", "borders", "terrs"].includes(styleElement)) {
+  if (
+    [
+      "anchors", "burgIcons", "borders",
+      "coastline", "isolines",
+      "routes", "labels", "lakes", "terrs"
+    ].includes(styleElement)) {
     const groups = byId(styleElement).querySelectorAll("g");
     groups.forEach(el => {
       if (el.id === "burgLabels") return;
@@ -440,13 +452,13 @@ styleStrokeInput.on("input", function () {
   styleStrokeOutput.value = this.value;
   getEl().attr("stroke", this.value);
   if (styleElementSelect.value === "gridOverlay" && layerIsOn("toggleGrid")) drawGrid();
-  if (styleElementSelect.value === "isolines" && layerIsOn("toggleIsolines")) drawIsolines();
+  // if (styleElementSelect.value === "isolines" && layerIsOn("toggleIsolines")) drawIsolines();
 });
 
 styleStrokeWidthInput.on("input", e => {
   getEl().attr("stroke-width", e.target.value);
   if (styleElementSelect.value === "gridOverlay" && layerIsOn("toggleGrid")) drawGrid();
-  if (styleElementSelect.value === "isolines" && layerIsOn("toggleIsolines")) drawIsolines();
+  // if (styleElementSelect.value === "isolines" && layerIsOn("toggleIsolines")) drawIsolines();
 });
 
 styleLetterSpacingInput.on("input", e => {
@@ -539,9 +551,9 @@ styleGridShiftY.on("input", function () {
   if (layerIsOn("toggleGrid")) drawGrid();
 });
 
-styleIsolinesInterval.on("input", function() {
+styleIsolinesInterval.addEventListener("input", function() {
   const interval = +this.value;
-  getEl().attr("data-interval", interval);
+  d3.select("#isolines").attr("data-interval", interval);
   drawIsolines();
 });
 

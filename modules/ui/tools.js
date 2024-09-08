@@ -8,25 +8,28 @@ toolsContent.addEventListener("click", function (event) {
   const button = event.target.id;
 
   // click on open Editor buttons
-  if (button === "editHeightmapButton") editHeightmap();
-  else if (button === "editBiomesButton") editBiomes();
-  else if (button === "editStatesButton") editStates();
-  else if (button === "editProvincesButton") editProvinces();
-  else if (button === "editDiplomacyButton") editDiplomacy();
-  else if (button === "editCulturesButton") editCultures();
-  else if (button === "editReligions") editReligions();
-  else if (button === "editEmblemButton") openEmblemEditor();
-  else if (button === "editNamesBaseButton") editNamesbase();
-  else if (button === "editUnitsButton") editUnits();
-  else if (button === "editNotesButton") editNotes();
-  else if (button === "editZonesButton") editZones();
-  else if (button === "overviewChartsButton") overviewCharts();
-  else if (button === "overviewBurgsButton") overviewBurgs();
-  else if (button === "overviewRoutesButton") overviewRoutes();
-  else if (button === "overviewRiversButton") overviewRivers();
-  else if (button === "overviewMilitaryButton") overviewMilitary();
-  else if (button === "overviewMarkersButton") overviewMarkers();
-  else if (button === "overviewCellsButton") viewCellDetails();
+  switch (button) {
+    case "editBiomesButton": editBiomes(); break;
+    case "editCulturesButton": editCultures(); break;
+    case "editDiplomacyButton": editDiplomacy(); break;
+    case "editEmblemButton": openEmblemEditor(); break;
+    case "editHeightmapButton": editHeightmap(); break;
+    case "editIsolinesButton": openIsolinesMenu(); break;
+    case "editNamesBaseButton": editNamesbase(); break;
+    case "editNotesButton": editNotes(); break;
+    case "editProvincesButton": editProvinces(); break;
+    case "editReligions": editReligions(); break;
+    case "editStatesButton": editStates(); break;
+    case "editUnitsButton": editUnits(); break;
+    case "editZonesButton": editZones(); break;
+    case "overviewBurgsButton": overviewBurgs(); break;
+    case "overviewCellsButton": viewCellDetails(); break;
+    case "overviewChartsButton": overviewCharts(); break;
+    case "overviewMarkersButton": overviewMarkers(); break;
+    case "overviewMilitaryButton": overviewMilitary(); break;
+    case "overviewRiversButton": overviewRivers(); break;
+    case "overviewRoutesButton": overviewRoutes(); break;
+  }
 
   // click on Regenerate buttons
   if (event.target.parentNode.id === "regenerateFeature") {
@@ -75,25 +78,29 @@ toolsContent.addEventListener("click", function (event) {
 });
 
 function processFeatureRegeneration(event, button) {
-  if (button === "regenerateStateLabels") drawStateLabels();
-  else if (button === "regenerateReliefIcons") {
-    ReliefIcons.draw();
-    if (!layerIsOn("toggleRelief")) toggleRelief();
-  } else if (button === "regenerateRoutes") {
-    regenerateRoutes();
-    if (!layerIsOn("toggleRoutes")) toggleRoutes();
-  } else if (button === "regenerateRivers") regenerateRivers();
-  else if (button === "regeneratePopulation") recalculatePopulation();
-  else if (button === "regenerateStates") regenerateStates();
-  else if (button === "regenerateProvinces") regenerateProvinces();
-  else if (button === "regenerateBurgs") regenerateBurgs();
-  else if (button === "regenerateEmblems") regenerateEmblems();
-  else if (button === "regenerateReligions") regenerateReligions();
-  else if (button === "regenerateCultures") regenerateCultures();
-  else if (button === "regenerateMilitary") regenerateMilitary();
-  else if (button === "regenerateIce") regenerateIce();
-  else if (button === "regenerateMarkers") regenerateMarkers();
-  else if (button === "regenerateZones") regenerateZones(event);
+  switch (button) {
+    case "regenerateBurgs": regenerateBurgs(); break;
+    case "regenerateCultures": regenerateCultures(); break;
+    case "regenerateEmblems": regenerateEmblems(); break;
+    case "regenerateIce": regenerateIce(); break;
+    case "regenerateMarkers": regenerateMarkers(); break;
+    case "regenerateMilitary": regenerateMilitary(); break;
+    case "regeneratePopulation": recalculatePopulation(); break;
+    case "regenerateProvinces": regenerateProvinces(); break;
+    case "regenerateReliefIcons":
+      ReliefIcons.draw();
+      if (!layerIsOn("toggleRelief")) toggleRelief();
+      break;
+    case "regenerateReligions": regenerateReligions(); break;
+    case "regenerateRivers": regenerateRivers(); break;
+    case "regenerateRoutes":
+      regenerateRoutes();
+      if (!layerIsOn("toggleRoutes")) toggleRoutes();
+      break;
+    case "regenerateStateLabels": drawStateLabels(); break;
+    case "regenerateStates": regenerateStates(); break;
+    case "regenerateZones": regenerateZones(event); break;
+  }
 }
 
 async function openEmblemEditor() {

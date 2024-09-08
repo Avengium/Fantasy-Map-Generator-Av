@@ -171,7 +171,6 @@ function getCurrentPreset() {
 // run on map regeneration
 function restoreLayers() {
   if (layerIsOn("toggleTexture")) drawTexture();
-  if (layerIsOn("toggleIsolines")) drawIsolines();
   if (layerIsOn("toggleHeight")) drawHeightmap();
   if (layerIsOn("toggleCells")) drawCells();
   if (layerIsOn("toggleGrid")) drawGrid();
@@ -187,6 +186,7 @@ function restoreLayers() {
   if (layerIsOn("toggleProvinces")) drawProvinces();
   if (layerIsOn("toggleReligions")) drawReligions();
   if (layerIsOn("toggleIce")) drawIce();
+  if (layerIsOn("toggleIsolines")) drawIsolines();
   if (layerIsOn("toggleEmblems")) drawEmblems();
   if (layerIsOn("toggleMarkers")) drawMarkers();
   if (layerIsOn("toggleZones")) drawZones();
@@ -381,52 +381,80 @@ function toggleIsolines(event) {
 
 function drawIsolines() {
   console.log("drawIsolines function called");
+  
   isolines.selectAll("*").remove();
 
-  const el = getEl();
+  const contours = isolines.append("g").attr("id", "contours");
+  const isobaths = isolines.append("g").attr("id", "isobaths");
+  const isohyets = isolines.append("g").attr("id", "isohyets");
 
-  if (!grid.cells || !grid.cells.h || !grid.cellsX || !grid.cellsY) {
+  const el = d3.select("#isolines");
+
+  if (!grid.cells || !grid.cells.h || !grid.cells.prec || !grid.cellsX || !grid.cellsY) {
     console.error("Grid data is not available");
     return;
   }
 
   const heights = grid.cells.h;
-  const min = d3.min(heights);
-  const max = d3.max(heights);
+  const precipitation = grid.cells.prec;
 
+  const activeGroup = el.attr("data-active-group") || "contours";
   const interval = +el.attr("data-interval") || 10;
-  const stroke = el.attr("stroke") || "#5a5a5a";
-  const strokeWidth = +el.attr("stroke-width") || 0.5;
   const opacity = +el.attr("opacity") || 1;
+  const boxStrokeWidth = +el.attr("data-box-stroke-width") || 0.02;
+  const isolineStrokeWidth = +el.attr("data-isoline-stroke-width") || 0.2;
 
-  // Generate contours
-  const contours = d3.contours()
-    .size([grid.cellsX, grid.cellsY])
-    .thresholds(d3.range(min, max, interval))
-    (heights);
+  const land = heights.map(h => h >= 20 ? 1 : 0);
+  const water = heights.map(h => h < 20 ? 1 : 0);
 
-  // Create path generator
-  const path = d3.geoPath();
+  const drawContours = (data, group) => {
+    const contourData = d3.contours()
+      .size([grid.cellsX, grid.cellsY])
+      .thresholds(d3.range(d3.min(data), d3.max(data), interval))
+      .smooth(true)
+      (data);
 
-  // Calculate scale factors
+      const getStrokeColor = () => {
+        switch (group.attr("id")) {
+          case "contours": return "#5a5a5a";  // Grey for land contours
+          case "isobaths": return "#0000ff";  // Blue for isobaths
+          case "isohyets": return "#00ff00";  // Green for isohyets
+          default: return "#000000";  // Black as fallback
+        }
+      };
+    
+      group.selectAll("path")
+        .data(contourData)
+        .enter()
+        .append("path")
+        .attr("d", d3.geoPath())
+        .attr("fill", "none")
+        .attr("stroke", getStrokeColor())
+        .attr("stroke-width", (d, i) => i === 0 ? boxStrokeWidth : isolineStrokeWidth)
+          // 0.02 for the box, 0.2 for other isolines
+        .attr("opacity", opacity);
+    };
+
+  switch (activeGroup) {
+    case "contours":
+      drawContours(heights.map((h, i) => land[i] ? h : undefined), contours);
+      break;
+    case "isobaths":
+      drawContours(heights.map((h, i) => water[i] ? h : undefined), isobaths);
+      break;
+    case "isohyets":
+      drawContours(precipitation, isohyets);
+      break;
+    default:
+      console.warn(`Unknown isoline group: ${activeGroup}`);
+  }
+
   const scaleX = graphWidth / grid.cellsX;
   const scaleY = graphHeight / grid.cellsY;
 
-  // Draw contour lines
-  isolines.selectAll("path")
-    .data(contours)
-    .enter()
-    .append("path")
-    .attr("d", path)
-    .attr("fill", "none")
-    .attr("stroke", stroke)
-    .attr("stroke-width", strokeWidth)
-    .attr("opacity", opacity);
-
-  // Apply transform to the entire isolines group
   isolines.attr("transform", `translate(0, 0) scale(${scaleX}, ${scaleY})`);
 
-  console.log(`Drew ${contours.length} isoline paths`);
+  console.log(`Drew ${activeGroup}`);
 
   isolines.raise();
 }

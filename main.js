@@ -107,6 +107,8 @@ terrs.append("g").attr("id", "oceanHeights");
 terrs.append("g").attr("id", "landHeights");
 
 isolines.append("g").attr("id", "contours");
+isolines.append("g").attr("id", "isobaths");
+isolines.append("g").attr("id", "isohyets");
 
 labels.append("g").attr("id", "states");
 labels.append("g").attr("id", "addedLabels");

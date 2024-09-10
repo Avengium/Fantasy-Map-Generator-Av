@@ -60,7 +60,6 @@ function handleKeyup(event) {
   else if (key === "$") createRoute();
   else if (key === "%") toggleAddMarker();
   else if (code === "KeyX") toggleTexture();
-  else if (code === "KeyQ") toggleIsolines();
   else if (code === "KeyH") toggleHeight();
   else if (code === "KeyB") toggleBiomes();
   else if (code === "KeyE") toggleCells();

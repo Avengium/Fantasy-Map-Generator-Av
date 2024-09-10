@@ -365,6 +365,10 @@ function toggleIsolines(event) {
   console.log("toggleIsolines called");
   if (!layerIsOn("toggleIsolines")) {
     console.log("Turning isolines on");
+
+    // Extract coordinates from pack.cells.p
+    extractCoordinates();
+
     if (!pack.cells.h || !pack.cells.x || !pack.cells.y || !grid.cells.prec) {
       console.error("Required data for isoline generation is not available");
       console.log("pack.cells.h:", pack.cells.h ? "present" : "missing");
@@ -392,7 +396,7 @@ function drawIsolines() {
   }
   const isolines = d3.select("#isolines");
   isolines.selectAll("*").remove();
-  
+
   isolines.attr("viewBox", `0 0 ${graphWidth} ${graphHeight}`);
 
   const types = {

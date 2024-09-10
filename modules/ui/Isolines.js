@@ -1,5 +1,31 @@
 "use strict";
 
+function extractCoordinates() {
+  if (!pack.cells.p || pack.cells.p.length === 0) {
+    console.error("pack.cells.p is missing or empty.");
+    return;
+  }
+
+  // Initialize x and y arrays
+  pack.cells.x = [];
+  pack.cells.y = [];
+
+  // Extract x and y coordinates from pack.cells.p
+  for (const coord of pack.cells.p) {
+    if (Array.isArray(coord) && coord.length === 2) {
+      pack.cells.x.push(coord[0]); // x coordinate
+      pack.cells.y.push(coord[1]); // y coordinate
+    } else {
+      console.error("Invalid coordinate format in pack.cells.p:", coord);
+    }
+  }
+
+  console.log("Coordinates extracted:", {
+    x: pack.cells.x.length,
+    y: pack.cells.y.length
+  });
+}
+
 function generateIsolines() {
   console.log("Generating isolines...");
   console.log("pack.cells.h:", pack.cells.h ? "present" : "missing");
@@ -204,13 +230,13 @@ function updateIsolinesMenu() {
   }
   body.insertAdjacentHTML("beforeend", lines);
 
+  // Add event listeners for isoline visibility toggles
+  body.querySelectorAll(".isolineGroup .icon-eye, .isolineGroup .icon-eye-off").forEach(el =>
+    el.addEventListener("click", toggleIsolineGroupVisibility));
+
   // Add event listeners
   /* body.querySelectorAll(".isolineGroup").forEach(el => 
     el.addEventListener("click", selectIsolineGroup)); 
-  body.querySelectorAll(".icon-eye, .icon-eye-off").forEach(el => 
-    el.addEventListener("click", toggleIsolineVisibility));
-  body.querySelectorAll(".icon-dot-circled").forEach(el => 
-    el.addEventListener("click", zoomToIsoline));
   body.querySelectorAll(".icon-pencil").forEach(el => 
     el.addEventListener("click", openIsolineEditor));
   body.querySelectorAll(".icon-trash-empty").forEach(el => 

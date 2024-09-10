@@ -130,7 +130,8 @@ function getPackCellsData() {
     routes: pack.cells.routes,
     state: Array.from(pack.cells.state),
     religion: Array.from(pack.cells.religion),
-    province: Array.from(pack.cells.province)
+    province: Array.from(pack.cells.province),
+    isolines: pack.cells.isolines
   };
 
   return {
@@ -174,7 +175,8 @@ function getPackCellsData() {
     rivers: pack.rivers,
     markers: pack.markers,
     routes: pack.routes,
-    zones: pack.zones
+    zones: pack.zones,
+    isolines: pack.isolines
   };
 }
 

@@ -124,7 +124,7 @@ function changePreset(preset) {
 }
 
 function savePreset() {
-  prompt("Please provide a preset name", {default: ""}, preset => {
+  prompt("Please provide a preset name", { default: "" }, preset => {
     presets[preset] = Array.from(byId("mapLayers").querySelectorAll("li:not(.buttonoff)"))
       .map(node => node.id)
       .sort();
@@ -226,7 +226,7 @@ function drawHeightmap() {
   // ocean cells
   const renderOceanCells = Boolean(+ocean.attr("data-render"));
   if (renderOceanCells) {
-    const {cells, vertices} = grid;
+    const { cells, vertices } = grid;
     const used = new Uint8Array(cells.i.length);
 
     const skip = +ocean.attr("skip") + 1 || 1;
@@ -255,7 +255,7 @@ function drawHeightmap() {
 
   // land cells
   {
-    const {cells, vertices} = pack;
+    const { cells, vertices } = pack;
     const used = new Uint8Array(cells.i.length);
 
     const skip = +land.attr("skip") + 1 || 1;
@@ -363,100 +363,86 @@ function getColor(value, scheme = getColorScheme("bright")) {
 
 function toggleIsolines(event) {
   console.log("toggleIsolines called");
-  if (!isolines.selectAll("path").size()) {
-    console.log("Drawing isolines");
+  if (!layerIsOn("toggleIsolines")) {
+    console.log("Turning isolines on");
+    if (!pack.cells.h || !pack.cells.x || !pack.cells.y || !grid.cells.prec) {
+      console.error("Required data for isoline generation is not available");
+      console.log("pack.cells.h:", pack.cells.h ? "present" : "missing");
+      console.log("pack.cells.x:", pack.cells.x ? "present" : "missing");
+      console.log("pack.cells.y:", pack.cells.y ? "present" : "missing");
+      return;
+    }
     turnButtonOn("toggleIsolines");
+    generateIsolines(); // Generate isolines if they don't exist
     drawIsolines();
     if (event && isCtrlClick(event)) editStyle("isolines");
   } else {
-    console.log("Removing isolines");
-    if (event && isCtrlClick(event)) {
-      editStyle("isolines");
-      return;
-    }
-    isolines.selectAll("path").remove();
+    console.log("Turning isolines off");
+    if (event && isCtrlClick(event)) return editStyle("isolines");
     turnButtonOff("toggleIsolines");
+    d3.select("#isolines").selectAll("*").remove();
   }
 }
 
 function drawIsolines() {
-  console.log("drawIsolines function called");
-  
-  isolines.selectAll("*").remove();
-
-  const contours = isolines.append("g").attr("id", "contours");
-  const isobaths = isolines.append("g").attr("id", "isobaths");
-  const isohyets = isolines.append("g").attr("id", "isohyets");
-
-  const el = d3.select("#isolines");
-
-  if (!grid.cells || !grid.cells.h || !grid.cells.prec || !grid.cellsX || !grid.cellsY) {
-    console.error("Grid data is not available");
+  console.log("Drawing isolines");
+  if (!pack.cells.isolines) {
+    console.error("No isoline data available. Cannot draw isolines.");
     return;
   }
+  const isolines = d3.select("#isolines");
+  isolines.selectAll("*").remove();
+  
+  isolines.attr("viewBox", `0 0 ${graphWidth} ${graphHeight}`);
 
-  const heights = grid.cells.h;
-  const precipitation = grid.cells.prec;
+  const types = {
+    contours: { color: "#5a5a5a" },
+    isobaths: { color: "#0077b6" },
+    isohyets: { color: "#00a86b" }
+  };
 
-  const activeGroup = el.attr("data-active-group") || "contours";
-  const interval = +el.attr("data-interval") || 10;
-  const opacity = +el.attr("opacity") || 1;
-  const boxStrokeWidth = +el.attr("data-box-stroke-width") || 0.02;
-  const isolineStrokeWidth = +el.attr("data-isoline-stroke-width") || 0.2;
+  for (const [type, style] of Object.entries(types)) {
+    console.log(`Drawing ${type} isolines`);
+    const isolineData = pack.cells.isolines[type];
+    if (!isolineData || isolineData.length === 0) {
+      console.log(`No isoline data for ${type}`);
+      continue;
+    }
+    const group = isolines.append("g").attr("class", type);
 
-  const land = heights.map(h => h >= 20 ? 1 : 0);
-  const water = heights.map(h => h < 20 ? 1 : 0);
+    const line = d3.line().curve(d3.curveBasisClosed);
 
-  const drawContours = (data, group) => {
-    const contourData = d3.contours()
-      .size([grid.cellsX, grid.cellsY])
-      .thresholds(d3.range(d3.min(data), d3.max(data), interval))
-      .smooth(true)
-      (data);
-
-      const getStrokeColor = () => {
-        switch (group.attr("id")) {
-          case "contours": return "#5a5a5a";  // Grey for land contours
-          case "isobaths": return "#0000ff";  // Blue for isobaths
-          case "isohyets": return "#00ff00";  // Green for isohyets
-          default: return "#000000";  // Black as fallback
-        }
-      };
-    
-      group.selectAll("path")
-        .data(contourData)
-        .enter()
-        .append("path")
-        .attr("d", d3.geoPath())
-        .attr("fill", "none")
-        .attr("stroke", getStrokeColor())
-        .attr("stroke-width", (d, i) => i === 0 ? boxStrokeWidth : isolineStrokeWidth)
-          // 0.02 for the box, 0.2 for other isolines
-        .attr("opacity", opacity);
-    };
-
-  switch (activeGroup) {
-    case "contours":
-      drawContours(heights.map((h, i) => land[i] ? h : undefined), contours);
-      break;
-    case "isobaths":
-      drawContours(heights.map((h, i) => water[i] ? h : undefined), isobaths);
-      break;
-    case "isohyets":
-      drawContours(precipitation, isohyets);
-      break;
-    default:
-      console.warn(`Unknown isoline group: ${activeGroup}`);
+    group.selectAll("path")
+      .data(isolineData)
+      .enter()
+      .append("path")
+      .attr("d", d => line(d.points))
+      .attr("fill", "none")
+      .attr("stroke", style.color)
+      .attr("stroke-width", 0.5)
+      .attr("opacity", 0.5)
+      .append("title")
+      .text(d => `${type}: ${d.value}`);
   }
 
-  const scaleX = graphWidth / grid.cellsX;
-  const scaleY = graphHeight / grid.cellsY;
+  console.log("Isolines drawn");
+}
 
-  isolines.attr("transform", `translate(0, 0) scale(${scaleX}, ${scaleY})`);
+function reducePrecisionPath(path, precision = 2) {
+  if (typeof path !== 'string') return path;
+  return path.replace(/(-?\d*\.\d+)/g, match => {
+    const num = parseFloat(match);
+    return isNaN(num) ? match : num.toFixed(precision);
+  });
+}
 
-  console.log(`Drew ${activeGroup}`);
-
-  isolines.raise();
+function getIsolineColor(type) {
+  switch (type) {
+    case "contours": return "#5a5a5a";
+    case "isobaths": return "#0077be";
+    case "isohyets": return "#00a86b";
+    default: return "#000000";
+  }
 }
 
 function toggleTemp(event) {
@@ -682,7 +668,7 @@ function togglePrec(event) {
 
 function drawPrec() {
   prec.selectAll("circle").remove();
-  const {cells, points} = grid;
+  const { cells, points } = grid;
 
   prec.style("display", "block");
   const show = d3.transition().duration(800).ease(d3.easeSinIn);
@@ -820,8 +806,8 @@ function toggleIce(event) {
 }
 
 function drawIce() {
-  const {cells, vertices} = grid;
-  const {temp, h} = cells;
+  const { cells, vertices } = grid;
+  const { temp, h } = cells;
   const n = cells.i.length;
 
   const used = new Uint8Array(cells.i.length);
@@ -911,7 +897,7 @@ function drawCultures() {
   TIME && console.time("drawCultures");
 
   cults.selectAll("path").remove();
-  const {cells, vertices, cultures} = pack;
+  const { cells, vertices, cultures } = pack;
   const n = cells.i.length;
   const used = new Uint8Array(cells.i.length);
   const paths = new Array(cultures.length).fill("");
@@ -985,7 +971,7 @@ function drawReligions() {
   TIME && console.time("drawReligions");
 
   relig.selectAll("path").remove();
-  const {cells, vertices, religions} = pack;
+  const { cells, vertices, religions } = pack;
   const n = cells.i.length;
 
   const used = new Uint8Array(cells.i.length);
@@ -1097,7 +1083,7 @@ function drawStates() {
   TIME && console.time("drawStates");
   regions.selectAll("path").remove();
 
-  const {cells, vertices, features} = pack;
+  const { cells, vertices, features } = pack;
   const states = pack.states;
   const n = cells.i.length;
 
@@ -1263,7 +1249,7 @@ function drawBorders() {
   TIME && console.time("drawBorders");
   borders.selectAll("path").remove();
 
-  const {cells, vertices} = pack;
+  const { cells, vertices } = pack;
   const n = cells.i.length;
 
   const sPath = [];
@@ -1387,7 +1373,7 @@ function drawProvinces() {
   provs.selectAll("*").remove();
 
   const provinces = pack.provinces;
-  const {body, gap} = getProvincesVertices();
+  const { body, gap } = getProvincesVertices();
 
   const g = provs.append("g").attr("id", "provincesBody");
   const bodyData = body.map((p, i) => [p.length > 10 ? p : null, i, provinces[i].color]).filter(d => d[0]);
@@ -1465,7 +1451,7 @@ function getProvincesVertices() {
     provinces[i].pole = polylabel(sorted, 1.0); // pole of inaccessibility
   });
 
-  return {body, gap};
+  return { body, gap };
 
   // connect vertices to chain
   function connectVertices(start, t, province) {
@@ -1598,15 +1584,15 @@ function drawCoordinates() {
     const text = !v
       ? v
       : Number.isInteger(v)
-      ? lat
-        ? c[1] < 0
-          ? -c[1] + "°S"
-          : c[1] + "°N"
-        : c[0] < 0
-        ? -c[0] + "°W"
-        : c[0] + "°E"
-      : "";
-    return {lat, x, y, text};
+        ? lat
+          ? c[1] < 0
+            ? -c[1] + "°S"
+            : c[1] + "°N"
+          : c[0] < 0
+            ? -c[0] + "°W"
+            : c[0] + "°E"
+        : "";
+    return { lat, x, y, text };
   });
 
   const d = round(d3.geoPath(projection)(graticule()));
@@ -1704,10 +1690,10 @@ function drawRivers() {
   TIME && console.time("drawRivers");
   rivers.selectAll("*").remove();
 
-  const {addMeandering, getRiverPath} = Rivers;
+  const { addMeandering, getRiverPath } = Rivers;
   lineGen.curve(d3.curveCatmullRom.alpha(0.1));
 
-  const riverPaths = pack.rivers.map(({cells, points, i, widthFactor, sourceWidth}) => {
+  const riverPaths = pack.rivers.map(({ cells, points, i, widthFactor, sourceWidth }) => {
     if (!cells || cells.length < 2) return;
 
     if (points && points.length !== cells.length) {
@@ -1743,7 +1729,7 @@ function drawRoutes() {
   const routePaths = {};
 
   for (const route of pack.routes) {
-    const {i, group, points} = route;
+    const { i, group, points } = route;
     if (!points || points.length < 2) continue;
     if (!routePaths[group]) routePaths[group] = [];
     routePaths[group].push(`<path id="route${i}" d="${Routes.getPath(route)}"/>`);
@@ -1788,7 +1774,7 @@ function drawMarkers() {
   const rescale = +markers.attr("rescale");
   const pinned = +markers.attr("pinned");
 
-  const markersData = pinned ? pack.markers.filter(({pinned}) => pinned) : pack.markers;
+  const markersData = pinned ? pack.markers.filter(({ pinned }) => pinned) : pack.markers;
   const html = markersData.map(marker => drawMarker(marker, rescale));
   markers.html(html.join(""));
 }
@@ -1817,7 +1803,7 @@ const getPin = (shape = "bubble", fill = "#fff", stroke = "#000") => {
 };
 
 function drawMarker(marker, rescale = 1) {
-  const {i, icon, x, y, dx = 50, dy = 50, px = 12, size = 30, pin, fill, stroke} = marker;
+  const { i, icon, x, y, dx = 50, dy = 50, px = 12, size = 30, pin, fill, stroke } = marker;
   const id = `marker${i}`;
   const zoomSize = rescale ? Math.max(rn(size / 5 + 24 / scale, 2), 1) : size;
   const viewX = rn(x - zoomSize / 2, 1);
@@ -1992,12 +1978,12 @@ function drawZones() {
   const filterBy = byId("zonesFilterType").value;
   const isFiltered = filterBy && filterBy !== "all";
   const visibleZones = pack.zones.filter(
-    ({hidden, cells, type}) => !hidden && cells.length && (!isFiltered || type === filterBy)
+    ({ hidden, cells, type }) => !hidden && cells.length && (!isFiltered || type === filterBy)
   );
   zones.html(visibleZones.map(drawZone).join(""));
 }
 
-function drawZone({i, cells, type, color}) {
+function drawZone({ i, cells, type, color }) {
   const path = getVertexPath(cells);
   return `<path id="zone${i}" data-id="${i}" data-type="${type}" d="${path}" fill="${color}" />`;
 }
@@ -2017,7 +2003,7 @@ function toggleEmblems(event) {
 
 function drawEmblems() {
   TIME && console.time("drawEmblems");
-  const {states, provinces, burgs} = pack;
+  const { states, provinces, burgs } = pack;
 
   const validStates = states.filter(s => s.i && !s.removed && s.coa && s.coa.size !== 0);
   const validProvinces = provinces.filter(p => p.i && !p.removed && p.coa && p.coa.size !== 0);
@@ -2046,10 +2032,10 @@ function drawEmblems() {
 
   const sizeBurgs = getBurgEmblemSize();
   const burgCOAs = validBurgs.map(burg => {
-    const {x, y} = burg;
+    const { x, y } = burg;
     const size = burg.coa.size || 1;
     const shift = (sizeBurgs * size) / 2;
-    return {type: "burg", i: burg.i, x: burg.coa.x || x, y: burg.coa.y || y, size, shift};
+    return { type: "burg", i: burg.i, x: burg.coa.x || x, y: burg.coa.y || y, size, shift };
   });
 
   const sizeProvinces = getProvinceEmblemsSize();
@@ -2058,7 +2044,7 @@ function drawEmblems() {
     const [x, y] = province.pole || pack.cells.p[province.center];
     const size = province.coa.size || 1;
     const shift = (sizeProvinces * size) / 2;
-    return {type: "province", i: province.i, x: province.coa.x || x, y: province.coa.y || y, size, shift};
+    return { type: "province", i: province.i, x: province.coa.x || x, y: province.coa.y || y, size, shift };
   });
 
   const sizeStates = getStateEmblemsSize();
@@ -2066,7 +2052,7 @@ function drawEmblems() {
     const [x, y] = state.pole || pack.cells.p[state.center];
     const size = state.coa.size || 1;
     const shift = (sizeStates * size) / 2;
-    return {type: "state", i: state.i, x: state.coa.x || x, y: state.coa.y || y, size, shift};
+    return { type: "state", i: state.i, x: state.coa.x || x, y: state.coa.y || y, size, shift };
   });
 
   const nodes = burgCOAs.concat(provinceCOAs).concat(stateCOAs);
@@ -2091,8 +2077,7 @@ function drawEmblems() {
     const burgString = burgNodes
       .map(
         d =>
-          `<use data-i="${d.i}" x="${rn(d.x - d.shift)}" y="${rn(d.y - d.shift)}" width="${d.size}em" height="${
-            d.size
+          `<use data-i="${d.i}" x="${rn(d.x - d.shift)}" y="${rn(d.y - d.shift)}" width="${d.size}em" height="${d.size
           }em"/>`
       )
       .join("");
@@ -2102,8 +2087,7 @@ function drawEmblems() {
     const provinceString = provinceNodes
       .map(
         d =>
-          `<use data-i="${d.i}" x="${rn(d.x - d.shift)}" y="${rn(d.y - d.shift)}" width="${d.size}em" height="${
-            d.size
+          `<use data-i="${d.i}" x="${rn(d.x - d.shift)}" y="${rn(d.y - d.shift)}" width="${d.size}em" height="${d.size
           }em"/>`
       )
       .join("");
@@ -2113,8 +2097,7 @@ function drawEmblems() {
     const stateString = stateNodes
       .map(
         d =>
-          `<use data-i="${d.i}" x="${rn(d.x - d.shift)}" y="${rn(d.y - d.shift)}" width="${d.size}em" height="${
-            d.size
+          `<use data-i="${d.i}" x="${rn(d.x - d.shift)}" y="${rn(d.y - d.shift)}" width="${d.size}em" height="${d.size
           }em"/>`
       )
       .join("");
@@ -2154,7 +2137,7 @@ function turnButtonOn(el) {
 }
 
 // move layers on mapLayers dragging (jquery sortable)
-$("#mapLayers").sortable({items: "li:not(.solid)", containment: "parent", cancel: ".solid", update: moveLayer});
+$("#mapLayers").sortable({ items: "li:not(.solid)", containment: "parent", cancel: ".solid", update: moveLayer });
 function moveLayer(event, ui) {
   const el = getLayer(ui.item.attr("id"));
   if (!el) return;
@@ -2184,6 +2167,7 @@ function getLayer(id) {
   if (id === "togglePrec") return $("#prec");
   if (id === "togglePopulation") return $("#population");
   if (id === "toggleIce") return $("#ice");
+  if (id === "toggleIsolines") return $("#isolines");
   if (id === "toggleTexture") return $("#texture");
   if (id === "toggleEmblems") return $("#emblems");
   if (id === "toggleLabels") return $("#labels");

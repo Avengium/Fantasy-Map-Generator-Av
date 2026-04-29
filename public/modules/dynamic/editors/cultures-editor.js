@@ -88,7 +88,7 @@ function addListeners() {
   byId("culturesManuallyUndo").on("click", undoCulturesManualAssignment);
   byId("culturesManuallyApply").on("click", applyCultureManualAssignent);
   byId("culturesManuallyCancel").on("click", () => exitCulturesManualAssignment());
-  byId("culturesEditNamesBase").on("click", editNamesbase);
+  byId("culturesEditNamesBase").on("click", NamesbaseEditor.open);
   byId("culturesAdd").on("click", enterAddCulturesMode);
   byId("culturesExport").on("click", downloadCulturesCsv);
   byId("culturesImport").on("click", () => byId("culturesCSVToLoad").click());

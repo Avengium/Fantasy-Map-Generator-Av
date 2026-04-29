@@ -239,22 +239,88 @@ function editNamesbase() {
   }
 
   function namesbaseUpload(dataLoaded, override = true) {
-    const data = dataLoaded
+    const lines = dataLoaded
       .replace(/\r\n|\r/g, "\n")
       .split("\n")
       .filter(Boolean);
-    if (!data || !data[0]) return tip("Cannot load a namesbase. Please check the data format", false, "error");
+    if (!lines || !lines[0]) return tip("Cannot load a namesbase. Please check the data format", false, "error");
 
     Names.clearChains();
     if (override) nameBases = [];
-    const unsafe = new RegExp(/[|/]/, "g");
 
-    data.forEach(base => {
-      const [rawName, min, max, d, m, rawNames] = base.split("|");
-      const name = rawName.replace(unsafe, "");
-      const names = rawNames.replace(unsafe, "");
-      nameBases.push({name, min: +min, max: +max, d, m: +m, b: names});
+    const unsafe = new RegExp(/[|/]/, "g");
+    const escapeHtml = string =>
+      String(string)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+    const errors = [];
+    lines.forEach((line, index) => {
+      try {
+        const [rawName, min, max, d, m, rawNames] = line?.split("|") || [];
+        const name = rawName?.replace(unsafe, "");
+        if (!name) throw new Error("Name is missing");
+        const names = rawNames?.replace(unsafe, "");
+        if (!names) throw new Error("Names are missing");
+
+        nameBases.push({name, min: +min, max: +max, d, m: +m, b: names});
+      } catch (e) {
+        errors.push({id: index + 1, line, error: e.message});
+        ERROR && console.error(e);
+      }
     });
+
+    if (errors.length > 0) {
+      ERROR && console.error(`Namesbase upload errors`, errors);
+      const errorItems = errors
+        .map(({id, line, error}) => {
+          return /* html */ `<li style="padding:0.6em 0;border-top:1px solid #ddd;">
+            <div>
+              Line ${id}: 
+              <span style="color:#8b0000">${escapeHtml(error)}.</span> Data:
+            </div>
+            <div style="margin-top:0.35em;font-family:var(--font-monospace, monospace);font-size:0.95em;line-height:1.4;word-break:break-word;color:#333;">
+              ${escapeHtml(line) || "<empty line>"}
+            </div>
+          </li>`;
+        })
+        .join("");
+
+      alertMessage.innerHTML = /* html */ `<div>
+        <p style="margin:0.75em;">
+          <strong>File parsing error. Only ${lines.length - errors.length} out of ${lines.length} namebases added.</strong>
+          Each namebase should be on its onw line and follow the format: <code>name|min|max|dublication|m|names</code></span>. Parameters should be separated with <code>|</code> character and this character should not be used within the parameters. Another prohibited character is <code>/</code>. The most common issue is names and other parameters being on two separate lines.
+           <ul style="margin:0.5em;">
+            <li><code>name</code>: name of the base.
+            <li><code>min</code>: minimal recommended length of generated names. It should be a number.</li>
+            <li><code>max</code>: maximal recommended length of generated names. It should be a number greater than minimal length.</li>
+            <li><code>dublication</code>: characters that can be dublicated in generated names. For example <code>lkd</code> means names like "Kalla", "Mikkor", "Dalddur" are possible. This parameter can be empty.</li>
+            <li><code>m</code>: unused parameter, populate with <code>0</code>.</li>
+            <li><code>names</code>: names data, separated with commas. It should contain at least 3 names to be valid.</li>
+          </ul>
+        </p>
+        <div>
+          <ul style="margin:0;padding-left:1.5em;">
+            ${errorItems}
+          </ul>
+        </div>
+      </div>`;
+
+      $("#alert").dialog({
+        resizable: false,
+        title: "Parsing error",
+        width: "min(72vw, 68em)",
+        position: {my: "center center-4em", at: "center", of: "svg"},
+        buttons: {
+          Continue: function () {
+            $(this).dialog("close");
+          }
+        }
+      });
+    }
 
     createBasesList();
     updateInputs();

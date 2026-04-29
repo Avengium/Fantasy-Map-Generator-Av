@@ -43,7 +43,7 @@ function handleKeyup(event) {
   else if ((shift || altShift) && code === "KeyD") editDiplomacy();
   else if ((shift || altShift) && code === "KeyL") editCoastlineSettings();
   else if ((shift || altShift) && code === "KeyC") editCultures();
-  else if ((shift || altShift) && code === "KeyN") editNamesbase();
+  else if ((shift || altShift) && code === "KeyN") NamesbaseEditor.open();
   else if ((shift || altShift) && code === "KeyZ") editZones();
   else if ((shift || altShift) && code === "KeyR") editReligions();
   else if ((shift || altShift) && code === "KeyY") openEmblemEditor();

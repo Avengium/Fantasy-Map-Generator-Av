@@ -158,7 +158,7 @@ export function open(): void {
       ? unique(namesSourceString.match(/[\u0080-\uFFFF]/gu)!.join("").toLowerCase().split("")).join("")
       : "none";
 
-    const geminate = namesArray.map(name => name.match(/[^\w\s]|(.)(?=\1)/g) ?? []).flat();
+    const geminate = namesArray.flatMap(name => name.match(/[^\w\s]|(.)(?=\1)/g) ?? []);
     const doubled = unique(geminate).filter(char => geminate.filter(d => d === char).length > 3);
     const doubledStr = doubled.length ? doubled.join("") : "none";
 
@@ -352,9 +352,7 @@ export function open(): void {
 declare global {
   interface Window {
     NamesbaseEditor: {open: () => void};
-    editNamesbase: () => void;
   }
 }
 
 window.NamesbaseEditor = {open};
-window.editNamesbase = open;

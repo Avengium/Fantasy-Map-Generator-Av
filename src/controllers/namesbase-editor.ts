@@ -1,68 +1,47 @@
 import { max as d3max, min as d3min, mean, median } from "d3";
 import { byId, openURL, rn, unique } from "../utils";
 
-let listenersAttached = false;
-
 export function open(): void {
   if (customization) return;
   closeDialogs("#namesbaseEditor, .stable");
 
-  if (!listenersAttached) {
-    listenersAttached = true;
-    attachListeners();
-  }
-
   createBasesList();
   updateInputs();
+
+  const uploader = byId<HTMLInputElement>("namesbaseToLoad")!;
+  const listeners = [
+    listen(byId("namesbaseSelect"), "change", updateInputs),
+    listen(byId("namesbaseTextarea"), "change", updateNamesData),
+    listen(byId("namesbaseUpdateExamples"), "click", updateExamples),
+    listen(byId("namesbaseExamples"), "click", updateExamples),
+    listen(byId("namesbaseName"), "input", e => updateBaseName((e.target as HTMLInputElement).value)),
+    listen(byId("namesbaseMin"), "input", e => updateBaseMin((e.target as HTMLInputElement).value)),
+    listen(byId("namesbaseMax"), "input", e => updateBaseMax((e.target as HTMLInputElement).value)),
+    listen(byId("namesbaseDouble"), "input", e => updateBaseDuplication((e.target as HTMLInputElement).value)),
+    listen(byId("namesbaseAdd"), "click", namesbaseAdd),
+    listen(byId("namesbaseAnalyze"), "click", analyzeNamesbase),
+    listen(byId("namesbaseDefault"), "click", namesbaseRestoreDefault),
+    listen(byId("namesbaseDownload"), "click", namesbaseDownload),
+    listen(byId("namesbaseUpload"), "click", () => {
+      uploader.on("change", e => uploadFile(e.target as HTMLInputElement, d => namesbaseUpload(d, true)), {once: true});
+      uploader.click();
+    }),
+    listen(byId("namesbaseUploadExtend"), "click", () => {
+      uploader.on("change", e => uploadFile(e.target as HTMLInputElement, d => namesbaseUpload(d, false)), {once: true});
+      uploader.click();
+    }),
+    listen(byId("namesbaseCA"), "click", () =>
+      openURL("https://cartographyassets.com/asset-category/specific-assets/azgaars-generator/namebases/")
+    ),
+    listen(byId("namesbaseSpeak"), "click", () => speak(byId("namesbaseExamples")?.textContent ?? ""))
+  ];
 
   $("#namesbaseEditor").dialog({
     title: "Namesbase Editor",
     width: "60vw",
-    position: {my: "center", at: "center", of: "svg"}
+    position: {my: "center", at: "center", of: "svg"},
+    close: () => listeners.forEach(unlisten => void unlisten())
   });
-}
-
-function attachListeners(): void {
-  byId("namesbaseSelect")?.addEventListener("change", updateInputs);
-  byId("namesbaseTextarea")?.addEventListener("change", updateNamesData);
-  byId("namesbaseUpdateExamples")?.addEventListener("click", updateExamples);
-  byId("namesbaseExamples")?.addEventListener("click", updateExamples);
-
-  const nameInput = byId<HTMLInputElement>("namesbaseName");
-  nameInput?.addEventListener("input", () => updateBaseName(nameInput.value));
-
-  const minInput = byId<HTMLInputElement>("namesbaseMin");
-  minInput?.addEventListener("input", () => updateBaseMin(minInput.value));
-
-  const maxInput = byId<HTMLInputElement>("namesbaseMax");
-  maxInput?.addEventListener("input", () => updateBaseMax(maxInput.value));
-
-  const duplicationInput = byId<HTMLInputElement>("namesbaseDouble");
-  duplicationInput?.addEventListener("input", () => updateBaseDuplication(duplicationInput.value));
-
-  byId("namesbaseAdd")?.addEventListener("click", namesbaseAdd);
-  byId("namesbaseAnalyze")?.addEventListener("click", analyzeNamesbase);
-  byId("namesbaseDefault")?.addEventListener("click", namesbaseRestoreDefault);
-  byId("namesbaseDownload")?.addEventListener("click", namesbaseDownload);
-
-  const uploader = byId<HTMLInputElement>("namesbaseToLoad")!;
-  byId("namesbaseUpload")?.addEventListener("click", () => {
-    uploader.addEventListener("change", e => uploadFile(e.target as HTMLInputElement, d => namesbaseUpload(d, true)), {
-      once: true
-    });
-    uploader.click();
-  });
-  byId("namesbaseUploadExtend")?.addEventListener("click", () => {
-    uploader.addEventListener("change", e => uploadFile(e.target as HTMLInputElement, d => namesbaseUpload(d, false)), {
-      once: true
-    });
-    uploader.click();
-  });
-
-  byId("namesbaseCA")?.addEventListener("click", () =>
-    openURL("https://cartographyassets.com/asset-category/specific-assets/azgaars-generator/namebases/")
-  );
-  byId("namesbaseSpeak")?.addEventListener("click", () => speak(byId("namesbaseExamples")?.textContent ?? ""));
 }
 
 function createBasesList(): void {
@@ -358,6 +337,12 @@ const escapeHtml = (str: string): string =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+
+function listen(el: Element | null | undefined, event: string, handler: (e: Event) => void) {
+  if (!el) return () => {};
+  el.on(event, handler);
+  return () => el.off(event, handler);
+}
 
 interface ParseError {
   id: number;

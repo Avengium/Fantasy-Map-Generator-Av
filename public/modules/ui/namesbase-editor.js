@@ -82,7 +82,7 @@ function editNamesbase() {
     const base = +document.getElementById("namesbaseSelect").value;
     const input = document.getElementById("namesbaseTextarea");
     if (input.value.split(",").length < 3)
-      return tip("The names data provided is too short of incorrect", false, "error");
+      return tip("The names data provided is too short or incorrect", false, "error");
 
     const securedNamesData = input.value.replace(/[/|]/g, "");
     nameBases[base].b = securedNamesData;
@@ -292,12 +292,12 @@ function editNamesbase() {
       alertMessage.innerHTML = /* html */ `<div>
         <p style="margin:0.75em;">
           <strong>File parsing error. Only ${lines.length - errors.length} out of ${lines.length} namebases added.</strong>
-          Each namebase should be on its onw line and follow the format: <code>name|min|max|dublication|m|names</code></span>. Parameters should be separated with <code>|</code> character and this character should not be used within the parameters. Another prohibited character is <code>/</code>. The most common issue is names and other parameters being on two separate lines.
+          Each namebase should be on its own line and follow the format: <code>name|min|max|duplication|m|names</code>. Parameters should be separated with the <code>|</code> character, and this character should not be used within the parameters. Another prohibited character is <code>/</code>. The most common issue is names and other parameters being on two separate lines.
            <ul style="margin:0.5em;">
             <li><code>name</code>: name of the base.
             <li><code>min</code>: minimal recommended length of generated names. It should be a number.</li>
             <li><code>max</code>: maximal recommended length of generated names. It should be a number greater than minimal length.</li>
-            <li><code>dublication</code>: characters that can be dublicated in generated names. For example <code>lkd</code> means names like "Kalla", "Mikkor", "Dalddur" are possible. This parameter can be empty.</li>
+            <li><code>duplication</code>: characters that can be duplicated in generated names. For example <code>lkd</code> means names like "Kalla", "Mikkor", "Dalddur" are possible. This parameter can be empty.</li>
             <li><code>m</code>: unused parameter, populate with <code>0</code>.</li>
             <li><code>names</code>: names data, separated with commas. It should contain at least 3 names to be valid.</li>
           </ul>

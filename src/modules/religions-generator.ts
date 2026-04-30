@@ -1,8 +1,8 @@
 import { quadtree } from "d3";
 import {
   abbreviate,
-  byId,
   each,
+  ensureEl,
   gauss,
   getAdjective,
   getMixedColor,
@@ -604,7 +604,7 @@ const types: Record<string, Record<string, number>> = {
     Idols: 1,
     Occultism: 1,
   },
-  Sect: { Sect: 4, Society: 1, Brotherhood: 1, Circle: 1, Way: 1},
+  Sect: { Sect: 4, Society: 1, Brotherhood: 1, Circle: 1, Way: 1 },
 
   Heresy: {
     Heresy: 3,
@@ -1010,7 +1010,7 @@ class ReligionsModule {
     // limit cost for organized religions growth
     const maxExpansionCost =
       (cells.i.length / 20) *
-      (byId("growthRate") as HTMLInputElement).valueAsNumber;
+      (ensureEl("growthRate") as HTMLInputElement).valueAsNumber;
 
     religions
       .filter((r) => r.i && !r.lock && r.type !== "Folk" && !r.removed)

@@ -1,5 +1,5 @@
 import { max as d3max, min as d3min, mean, median } from "d3";
-import { byId, openURL, rn, unique } from "../utils";
+import { ensureEl, openURL, rn, unique } from "../utils";
 
 addListeners();
 
@@ -13,42 +13,67 @@ export function open(): void {
   $("#namesbaseEditor").dialog({
     title: "Namesbase Editor",
     width: "60vw",
-    position: {my: "center", at: "center", of: "svg"}
+    position: { my: "center", at: "center", of: "svg" },
   });
 }
 
 function addListeners(): void {
-  const uploader = byId<HTMLInputElement>("namesbaseToLoad")!;
+  const uploader = ensureEl<HTMLInputElement>("namesbaseToLoad");
 
-  byId("namesbaseSelect")?.addEventListener("change", updateInputs);
-  byId("namesbaseTextarea")?.addEventListener("change", updateNamesData);
-  byId("namesbaseUpdateExamples")?.addEventListener("click", updateExamples);
-  byId("namesbaseExamples")?.addEventListener("click", updateExamples);
-  byId("namesbaseName")?.addEventListener("input", e => updateBaseName((e.target as HTMLInputElement).value));
-  byId("namesbaseMin")?.addEventListener("input", e => updateBaseMin((e.target as HTMLInputElement).value));
-  byId("namesbaseMax")?.addEventListener("input", e => updateBaseMax((e.target as HTMLInputElement).value));
-  byId("namesbaseDouble")?.addEventListener("input", e => updateBaseDuplication((e.target as HTMLInputElement).value));
-  byId("namesbaseAdd")?.addEventListener("click", namesbaseAdd);
-  byId("namesbaseAnalyze")?.addEventListener("click", analyzeNamesbase);
-  byId("namesbaseDefault")?.addEventListener("click", namesbaseRestoreDefault);
-  byId("namesbaseDownload")?.addEventListener("click", namesbaseDownload);
-  byId("namesbaseUpload")?.addEventListener("click", () => {
-    uploader.addEventListener("change", e => uploadFile(e.target as HTMLInputElement, d => namesbaseUpload(d, true)), {once: true});
-    uploader.click();
-  });
-  byId("namesbaseUploadExtend")?.addEventListener("click", () => {
-    uploader.addEventListener("change", e => uploadFile(e.target as HTMLInputElement, d => namesbaseUpload(d, false)), {once: true});
-    uploader.click();
-  });
-  byId("namesbaseCA")?.addEventListener("click", () =>
-    openURL("https://cartographyassets.com/asset-category/specific-assets/azgaars-generator/namebases/")
+  ensureEl("namesbaseSelect").on("change", updateInputs);
+  ensureEl("namesbaseTextarea").on("change", updateNamesData);
+  ensureEl("namesbaseUpdateExamples").on("click", updateExamples);
+  ensureEl("namesbaseExamples").on("click", updateExamples);
+  ensureEl("namesbaseName").on("input", (e) =>
+    updateBaseName((e.target as HTMLInputElement).value),
   );
-  byId("namesbaseSpeak")?.addEventListener("click", () => speak(byId("namesbaseExamples")?.textContent ?? ""));
+  ensureEl("namesbaseMin").on("input", (e) =>
+    updateBaseMin((e.target as HTMLInputElement).value),
+  );
+  ensureEl("namesbaseMax").on("input", (e) =>
+    updateBaseMax((e.target as HTMLInputElement).value),
+  );
+  ensureEl("namesbaseDouble").on("input", (e) =>
+    updateBaseDuplication((e.target as HTMLInputElement).value),
+  );
+  ensureEl("namesbaseAdd").on("click", namesbaseAdd);
+  ensureEl("namesbaseAnalyze").on("click", analyzeNamesbase);
+  ensureEl("namesbaseDefault").on("click", namesbaseRestoreDefault);
+  ensureEl("namesbaseDownload").on("click", namesbaseDownload);
+  ensureEl("namesbaseUpload").on("click", () => {
+    uploader.on(
+      "change",
+      (e) =>
+        uploadFile(e.target as HTMLInputElement, (d) =>
+          namesbaseUpload(d, true),
+        ),
+      { once: true },
+    );
+    uploader.click();
+  });
+  ensureEl("namesbaseUploadExtend").on("click", () => {
+    uploader.on(
+      "change",
+      (e) =>
+        uploadFile(e.target as HTMLInputElement, (d) =>
+          namesbaseUpload(d, false),
+        ),
+      { once: true },
+    );
+    uploader.click();
+  });
+  ensureEl("namesbaseCA").on("click", () =>
+    openURL(
+      "https://cartographyassets.com/asset-category/specific-assets/azgaars-generator/namebases/",
+    ),
+  );
+  ensureEl("namesbaseSpeak").on("click", () =>
+    speak(ensureEl("namesbaseExamples").textContent ?? ""),
+  );
 }
 
 function createBasesList(): void {
-  const select = byId<HTMLSelectElement>("namesbaseSelect");
-  if (!select) return;
+  const select = ensureEl<HTMLSelectElement>("namesbaseSelect");
   select.innerHTML = "";
   nameBases.forEach((b, i) => {
     select.options.add(new Option(b.name, String(i)));
@@ -56,21 +81,26 @@ function createBasesList(): void {
 }
 
 function updateInputs(): void {
-  const base = +byId<HTMLSelectElement>("namesbaseSelect")!.value;
+  const base = +ensureEl<HTMLSelectElement>("namesbaseSelect").value;
   if (!nameBases[base]) {
     tip(`Namesbase ${base} is not defined`, false, "error");
     return;
   }
-  (byId("namesbaseTextarea") as HTMLTextAreaElement).value = nameBases[base].b;
-  (byId("namesbaseName") as HTMLInputElement).value = nameBases[base].name;
-  (byId("namesbaseMin") as HTMLInputElement).value = String(nameBases[base].min);
-  (byId("namesbaseMax") as HTMLInputElement).value = String(nameBases[base].max);
-  (byId("namesbaseDouble") as HTMLInputElement).value = nameBases[base].d;
+  (ensureEl("namesbaseTextarea") as HTMLTextAreaElement).value =
+    nameBases[base].b;
+  (ensureEl("namesbaseName") as HTMLInputElement).value = nameBases[base].name;
+  (ensureEl("namesbaseMin") as HTMLInputElement).value = String(
+    nameBases[base].min,
+  );
+  (ensureEl("namesbaseMax") as HTMLInputElement).value = String(
+    nameBases[base].max,
+  );
+  (ensureEl("namesbaseDouble") as HTMLInputElement).value = nameBases[base].d;
   updateExamples();
 }
 
 function updateExamples(): void {
-  const base = +byId<HTMLSelectElement>("namesbaseSelect")!.value;
+  const base = +ensureEl<HTMLSelectElement>("namesbaseSelect").value;
   let examples = "";
   for (let i = 0; i < 7; i++) {
     const example = Names.getBase(base);
@@ -81,13 +111,12 @@ function updateExamples(): void {
     if (i) examples += ", ";
     examples += example;
   }
-  const examplesEl = byId("namesbaseExamples");
-  if (examplesEl) examplesEl.innerHTML = examples;
+  ensureEl("namesbaseExamples").innerHTML = examples;
 }
 
 function updateNamesData(): void {
-  const base = +byId<HTMLSelectElement>("namesbaseSelect")!.value;
-  const input = byId<HTMLTextAreaElement>("namesbaseTextarea")!;
+  const base = +ensureEl<HTMLSelectElement>("namesbaseSelect").value;
+  const input = ensureEl<HTMLTextAreaElement>("namesbaseTextarea");
   if (input.value.split(",").length < 3) {
     tip("The names data provided is too short or incorrect", false, "error");
     return;
@@ -99,15 +128,15 @@ function updateNamesData(): void {
 }
 
 function updateBaseName(rawName: string): void {
-  const base = +byId<HTMLSelectElement>("namesbaseSelect")!.value;
-  const select = byId<HTMLSelectElement>("namesbaseSelect")!;
+  const base = +ensureEl<HTMLSelectElement>("namesbaseSelect").value;
+  const select = ensureEl<HTMLSelectElement>("namesbaseSelect");
   const name = rawName.replace(/[/|]/g, "");
   select.options[select.selectedIndex].innerHTML = name;
   nameBases[base].name = name;
 }
 
 function updateBaseMin(value: string): void {
-  const base = +byId<HTMLSelectElement>("namesbaseSelect")!.value;
+  const base = +ensureEl<HTMLSelectElement>("namesbaseSelect").value;
   if (+value > nameBases[base].max) {
     tip("Minimal length cannot be greater than maximal", false, "error");
     return;
@@ -116,7 +145,7 @@ function updateBaseMin(value: string): void {
 }
 
 function updateBaseMax(value: string): void {
-  const base = +byId<HTMLSelectElement>("namesbaseSelect")!.value;
+  const base = +ensureEl<HTMLSelectElement>("namesbaseSelect").value;
   if (+value < nameBases[base].min) {
     tip("Maximal length should be greater than minimal", false, "error");
     return;
@@ -125,12 +154,14 @@ function updateBaseMax(value: string): void {
 }
 
 function updateBaseDuplication(value: string): void {
-  const base = +byId<HTMLSelectElement>("namesbaseSelect")!.value;
+  const base = +ensureEl<HTMLSelectElement>("namesbaseSelect").value;
   nameBases[base].d = value;
 }
 
 function analyzeNamesbase(): void {
-  const namesSourceString = (byId("namesbaseTextarea") as HTMLTextAreaElement).value;
+  const namesSourceString = (
+    ensureEl("namesbaseTextarea") as HTMLTextAreaElement
+  ).value;
   const namesArray = namesSourceString.toLowerCase().split(",");
   const length = namesArray.length;
   if (!namesSourceString || !length) {
@@ -140,9 +171,9 @@ function analyzeNamesbase(): void {
 
   const chain = Names.calculateChain(namesSourceString);
   const chainValues = Object.values(chain) as string[][];
-  const variety = rn(mean(chainValues.map(kv => kv.length)) ?? 0);
+  const variety = rn(mean(chainValues.map((kv) => kv.length)) ?? 0);
 
-  const wordsLength = namesArray.map(n => n.length);
+  const wordsLength = namesArray.map((n) => n.length);
 
   const nonLatin = namesSourceString.match(/[\u0080-\uFFFF]/gu);
   const nonBasicLatinChars = nonLatin
@@ -151,16 +182,22 @@ function analyzeNamesbase(): void {
           .match(/[\u0080-\uFFFF]/gu)!
           .join("")
           .toLowerCase()
-          .split("")
+          .split(""),
       ).join("")
     : "none";
 
-  const geminate = namesArray.flatMap(name => name.match(/[^\w\s]|(.)(?=\1)/g) ?? []);
-  const doubled = unique(geminate).filter(char => geminate.filter(d => d === char).length > 3);
+  const geminate = namesArray.flatMap(
+    (name) => name.match(/[^\w\s]|(.)(?=\1)/g) ?? [],
+  );
+  const doubled = unique(geminate).filter(
+    (char) => geminate.filter((d) => d === char).length > 3,
+  );
   const doubledStr = doubled.length ? doubled.join("") : "none";
 
-  const duplicates = unique(namesArray.filter((e, i, a) => a.indexOf(e) !== i)).join(", ") || "none";
-  const multiwordRate = mean(namesArray.map(n => +n.includes(" "))) ?? 0;
+  const duplicates =
+    unique(namesArray.filter((e, i, a) => a.indexOf(e) !== i)).join(", ") ||
+    "none";
+  const multiwordRate = mean(namesArray.map((n) => +n.includes(" "))) ?? 0;
 
   const getLengthQuality = (): string => {
     if (length < 30)
@@ -199,12 +236,12 @@ function analyzeNamesbase(): void {
     resizable: false,
     title: "Data Analysis",
     width: "auto",
-    position: {my: "left top-30", at: "right+10 top", of: "#namesbaseEditor"},
+    position: { my: "left top-30", at: "right+10 top", of: "#namesbaseEditor" },
     buttons: {
       OK: function () {
         $(this).dialog("close");
-      }
-    }
+      },
+    },
   });
 }
 
@@ -212,16 +249,25 @@ function namesbaseAdd(): void {
   const baseId = nameBases.length;
   const b =
     "This,is,an,example,of,name,base,showing,correct,format,It,should,have,at,least,one,hundred,names,separated,with,comma";
-  nameBases.push({name: `Base${baseId}`, i: baseId, min: 5, max: 12, d: "", m: 0, b});
-  byId<HTMLSelectElement>("namesbaseSelect")?.add(new Option(`Base${baseId}`, String(baseId)));
-  (byId("namesbaseSelect") as HTMLSelectElement).value = String(baseId);
-  (byId("namesbaseTextarea") as HTMLTextAreaElement).value = b;
-  (byId("namesbaseName") as HTMLInputElement).value = `Base${baseId}`;
-  (byId("namesbaseMin") as HTMLInputElement).value = "5";
-  (byId("namesbaseMax") as HTMLInputElement).value = "12";
-  (byId("namesbaseDouble") as HTMLInputElement).value = "";
-  const examplesEl = byId("namesbaseExamples");
-  if (examplesEl) examplesEl.innerHTML = "Please provide names data";
+  nameBases.push({
+    name: `Base${baseId}`,
+    i: baseId,
+    min: 5,
+    max: 12,
+    d: "",
+    m: 0,
+    b,
+  });
+  ensureEl<HTMLSelectElement>("namesbaseSelect").add(
+    new Option(`Base${baseId}`, String(baseId)),
+  );
+  (ensureEl("namesbaseSelect") as HTMLSelectElement).value = String(baseId);
+  (ensureEl("namesbaseTextarea") as HTMLTextAreaElement).value = b;
+  (ensureEl("namesbaseName") as HTMLInputElement).value = `Base${baseId}`;
+  (ensureEl("namesbaseMin") as HTMLInputElement).value = "5";
+  (ensureEl("namesbaseMax") as HTMLInputElement).value = "12";
+  (ensureEl("namesbaseDouble") as HTMLInputElement).value = "";
+  ensureEl("namesbaseExamples").innerHTML = "Please provide names data";
 }
 
 function namesbaseRestoreDefault(): void {
@@ -239,13 +285,15 @@ function namesbaseRestoreDefault(): void {
       },
       Cancel: function () {
         $(this).dialog("close");
-      }
-    }
+      },
+    },
   });
 }
 
 function namesbaseDownload(): void {
-  const data = nameBases.map(b => `${b.name}|${b.min}|${b.max}|${b.d}|${b.m}|${b.b}`).join("\r\n");
+  const data = nameBases
+    .map((b) => `${b.name}|${b.min}|${b.max}|${b.d}|${b.m}|${b.b}`)
+    .join("\r\n");
   const name = `${getFileName("Namesbase")}.txt`;
   downloadFile(data, name);
 }
@@ -256,7 +304,11 @@ function namesbaseUpload(dataLoaded: string, override = true): void {
     .split("\n")
     .filter(Boolean);
   if (!lines.length) {
-    tip("Cannot load a namesbase. Please check the data format", false, "error");
+    tip(
+      "Cannot load a namesbase. Please check the data format",
+      false,
+      "error",
+    );
     return;
   }
 
@@ -271,9 +323,17 @@ function namesbaseUpload(dataLoaded: string, override = true): void {
       if (!name) throw new Error("Name is missing");
       const names = rawNames?.replace(unsafe, "");
       if (!names) throw new Error("Names are missing");
-      nameBases.push({name, i: nameBases.length, min: +min, max: +max, d, m: +m, b: names});
+      nameBases.push({
+        name,
+        i: nameBases.length,
+        min: +min,
+        max: +max,
+        d,
+        m: +m,
+        b: names,
+      });
     } catch (e) {
-      errors.push({id: index + 1, line, error: (e as Error).message});
+      errors.push({ id: index + 1, line, error: (e as Error).message });
       ERROR && console.error(e);
     }
   });
@@ -282,7 +342,11 @@ function namesbaseUpload(dataLoaded: string, override = true): void {
     ERROR && console.error("Namesbase upload errors", errors);
     const errorItems = errors
       .map(
-        ({id, line, error}) => /* html */ `<li style="padding:0.6em 0;border-top:1px solid #ddd;">
+        ({
+          id,
+          line,
+          error,
+        }) => /* html */ `<li style="padding:0.6em 0;border-top:1px solid #ddd;">
             <div>
               Line ${id}:
               <span style="color:#8b0000">${escapeHtml(error)}.</span> Data:
@@ -290,7 +354,7 @@ function namesbaseUpload(dataLoaded: string, override = true): void {
             <div style="margin-top:0.35em;font-family:var(--font-monospace,monospace);font-size:0.95em;line-height:1.4;word-break:break-word;color:#333;">
               ${escapeHtml(line) || "<empty line>"}
             </div>
-          </li>`
+          </li>`,
       )
       .join("");
 
@@ -318,12 +382,12 @@ function namesbaseUpload(dataLoaded: string, override = true): void {
       resizable: false,
       title: "Parsing error",
       width: "min(72vw, 68em)",
-      position: {my: "center center-4em", at: "center", of: "svg"},
+      position: { my: "center center-4em", at: "center", of: "svg" },
       buttons: {
         Continue: function () {
           $(this).dialog("close");
-        }
-      }
+        },
+      },
     });
   }
 
@@ -349,8 +413,8 @@ interface ParseError {
 
 declare global {
   interface Window {
-    NamesbaseEditor: {open: () => void};
+    NamesbaseEditor: { open: () => void };
   }
 }
 
-window.NamesbaseEditor = {open};
+window.NamesbaseEditor = { open };

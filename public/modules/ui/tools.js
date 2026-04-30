@@ -986,11 +986,11 @@ function viewCellDetails() {
 }
 
 async function overviewCharts() {
-  const Overview = await import("../dynamic/overview/charts-overview.js?v=1.120.1");
+  const Overview = await import("../dynamic/overview/charts-overview.js?v=1.120.5");
   Overview.open();
 }
 
 async function openMinimap() {
-  const Minimap = await import("./minimap.js?v=1.117.0");
+  const Minimap = await import("./minimap.js?v=1.120.5");
   Minimap.openMinimapDialog();
 }

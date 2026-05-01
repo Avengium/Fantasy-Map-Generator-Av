@@ -1,4 +1,9 @@
-export function toggleGoods(event?: MouseEvent) {
+declare global {
+  function toggleGoods(event?: MouseEvent): void;
+  function drawGoods(): void;
+}
+
+function toggleGoods(event?: MouseEvent) {
   if (!layerIsOn("toggleGoods")) {
     turnButtonOn("toggleGoods");
     drawGoods();
@@ -10,7 +15,7 @@ export function toggleGoods(event?: MouseEvent) {
   }
 }
 
-export function drawGoods() {
+function drawGoods() {
   TIME && console.time("drawGoods");
   const someArePinned = pack.goods.some((good: any) => good.pinned);
   const drawCircle = +goods.attr("data-circle");
@@ -39,11 +44,6 @@ export function drawGoods() {
 
   goods.style("display", null).html(goodsHTML);
   TIME && console.timeEnd("drawGoods");
-}
-
-declare global {
-  function toggleGoods(event?: MouseEvent): void;
-  function drawGoods(): void;
 }
 
 window.toggleGoods = toggleGoods;

@@ -20,6 +20,6 @@ import "./markers-generator";
 import "./fonts";
 import "./goods-generator";
 import "./production-generator";
-import "../renderers/draw-goods";
-import "../controllers/goods-editor";
+import "./ui/goods-renderer";
+import "./ui/goods-editor";
 import "./resample";

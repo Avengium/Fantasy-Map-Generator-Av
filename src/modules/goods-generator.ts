@@ -20,7 +20,6 @@ export interface Good {
   custom?: string;
   fn?: (methods: any) => boolean;
   pinned?: boolean;
-  stroke?: string;
 }
 
 export class GoodsModule {
@@ -597,12 +596,12 @@ export class GoodsModule {
     river: () => pack.cells.r[this.cellId]
   };
 
-  generate(regenerate: boolean = false) {
+  generate() {
     TIME && console.time("generateGoods");
     this.cells = pack.cells;
     this.cells.good = new Uint8Array(this.cells.i.length); // goods array [0, 255]
     const resourceMaxCells = Math.ceil((200 * this.cells.i.length) / 5000);
-    if (!pack.goods || regenerate) pack.goods = this.defaultGoods;
+    if (!pack.goods) pack.goods = this.defaultGoods;
     pack.goods.forEach((r: Good) => {
       r.cells = 0;
       const model = r.custom || this.models[r.model as keyof typeof this.models];

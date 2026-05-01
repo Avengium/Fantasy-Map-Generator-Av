@@ -468,7 +468,7 @@ function regenerateBurgs() {
 }
 
 function regenerateGoods() {
-  Goods.generate(true);
+  Goods.generate();
   goods.selectAll("*").remove();
   if (layerIsOn("toggleGoods")) drawGoods();
   refreshAllEditors();

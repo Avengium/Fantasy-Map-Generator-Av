@@ -91,8 +91,6 @@ function editBurg(id) {
     ensureEl("burgTemple").classList.toggle("inactive", !b.temple);
     ensureEl("burgShanty").classList.toggle("inactive", !b.shanty);
 
-    ensureEl("burgProduction").innerHTML = getProduction(b.produced);
-
     updateBurgLockIcon();
 
     // set emlem image
@@ -474,23 +472,6 @@ const meanTempCityMap = {
   29: "Niamey (Niger)",
   30: "Khartoum (Sudan)"
 };
-
-function getProduction(pool) {
-  if (!pool) return "";
-  let html = "";
-  for (const resourceId in pool) {
-    const resource = Resources.get(+resourceId);
-    if (!resource) continue;
-    const {name, unit, icon} = resource;
-    const production = pool[resourceId];
-    const unitName = production > 1 ? unit + "s" : unit;
-    html += `<span data-tip="${name}: ${production} ${unitName}">
-      <svg class="resIcon" width="1em" height="1em"><use href="#${icon}"></use></svg>
-      <span style="margin: 0 0.2em 0 -0.2em">${production}</span>
-    </span>`;
-  }
-  return html;
-}
 
 function getTemperatureLikeness(temperature) {
   if (temperature < -5) return "Yakutsk (Russia)";

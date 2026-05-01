@@ -32,7 +32,6 @@ function clicked() {
   else if (grand.id === "coastline") editCoastline();
   else if (grand.id === "lakes") editLake();
   else if (great.id === "armies") editRegiment();
-  else if (grand.id === "goods" || parent.id === "goods") editResources();
 }
 
 // clear elSelected variable
@@ -939,9 +938,7 @@ function selectIcon(initial, callback) {
 }
 
 function getAreaUnit(squareMark = "²") {
-  return ensureEl("areaUnit").value === "square"
-    ? ensureEl("distanceUnitInput").value + squareMark
-    : ensureEl("areaUnit").value;
+  return ensureEl("areaUnit").value === "square" ? ensureEl("distanceUnitInput").value + squareMark : ensureEl("areaUnit").value;
 }
 
 function getArea(rawArea) {

@@ -16,7 +16,6 @@ toolsContent.addEventListener("click", function (event) {
   else if (button === "editCoastlineSettings") editCoastlineSettings();
   else if (button === "editCulturesButton") editCultures();
   else if (button === "editReligions") editReligions();
-  else if (button === "editResources") editResources();
   else if (button === "editEmblemButton") openEmblemEditor();
   else if (button === "editNamesBaseButton") NamesbaseEditor.open();
   else if (button === "editUnitsButton") editUnits();
@@ -92,7 +91,6 @@ function processFeatureRegeneration(event, button) {
   else if (button === "regenerateStates") regenerateStates();
   else if (button === "regenerateProvinces") regenerateProvinces();
   else if (button === "regenerateBurgs") regenerateBurgs();
-  else if (button === "regenerateResources") regenerateResources();
   else if (button === "regenerateEmblems") regenerateEmblems();
   else if (button === "regenerateReligions") regenerateReligions();
   else if (button === "regenerateCultures") regenerateCultures();
@@ -465,13 +463,6 @@ function regenerateBurgs() {
 
   if (ensureEl("burgsOverviewRefresh").offsetParent) burgsOverviewRefresh.click();
   if (document.getElementById("statesEditorRefresh")?.offsetParent) statesEditorRefresh.click();
-}
-
-function regenerateResources() {
-  Resources.generate();
-  goods.selectAll("*").remove();
-  if (layerIsOn("toggleResources")) drawResources();
-  refreshAllEditors();
 }
 
 function regenerateEmblems() {

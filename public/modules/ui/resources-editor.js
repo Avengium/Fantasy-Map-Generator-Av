@@ -1,43 +1,43 @@
 "use strict";
-function editGoods() {
+function editResources() {
   if (customization) return;
-  closeDialogs("#goodsEditor, .stable");
-  if (!layerIsOn("toggleGoods")) toggleGoods();
-  const body = document.getElementById("goodsBody");
+  closeDialogs("#resourcesEditor, .stable");
+  if (!layerIsOn("toggleResources")) toggleResources();
+  const body = document.getElementById("resourcesBody");
 
-  goodsEditorAddLines();
+  resourcesEditorAddLines();
 
-  if (modules.editGoods) return;
-  modules.editGoods = true;
+  if (modules.editResources) return;
+  modules.editResources = true;
 
-  $("#goodsEditor").dialog({
-    title: "Goods Editor",
+  $("#resourcesEditor").dialog({
+    title: "Resources Editor",
     resizable: false,
     width: fitContent(),
-    close: closeGoodsEditor,
+    close: closeResourcesEditor,
     position: {my: "right top", at: "right-10 top+10", of: "svg"}
   });
 
   // add listeners
-  document.getElementById("goodsEditorRefresh").addEventListener("click", goodsEditorAddLines);
-  document.getElementById("goodsRegenerate").addEventListener("click", regenerateCurrentGoods);
-  document.getElementById("goodsLegend").addEventListener("click", toggleLegend);
-  document.getElementById("goodsPercentage").addEventListener("click", togglePercentageMode);
-  document.getElementById("goodsAssign").addEventListener("click", enterResourceAssignMode);
-  document.getElementById("goodsAdd").addEventListener("click", goodAdd);
-  document.getElementById("goodsRestore").addEventListener("click", goodsRestoreDefaults);
-  document.getElementById("goodsExport").addEventListener("click", downloadGoodsData);
-  document.getElementById("goodsUnpinAll").addEventListener("click", unpinAllGoods);
+  document.getElementById("resourcesEditorRefresh").addEventListener("click", resourcesEditorAddLines);
+  document.getElementById("resourcesRegenerate").addEventListener("click", regenerateCurrentResources);
+  document.getElementById("resourcesLegend").addEventListener("click", toggleLegend);
+  document.getElementById("resourcesPercentage").addEventListener("click", togglePercentageMode);
+  document.getElementById("resourcesAssign").addEventListener("click", enterResourceAssignMode);
+  document.getElementById("resourcesAdd").addEventListener("click", resourceAdd);
+  document.getElementById("resourcesRestore").addEventListener("click", resourcesRestoreDefaults);
+  document.getElementById("resourcesExport").addEventListener("click", downloadResourcesData);
+  document.getElementById("resourcesUnpinAll").addEventListener("click", unpinAllResources);
 
   body.addEventListener("click", function (ev) {
     const el = ev.target,
       cl = el.classList,
       line = el.parentNode;
-    const resource = Goods.get(+line.dataset.id);
-    if (cl.contains("goodIcon")) return changeIcon(resource, line, el);
-    if (cl.contains("goodCategory")) return changeCategory(resource, line, el);
-    if (cl.contains("goodModel")) return changeModel(resource, line, el);
-    if (cl.contains("goodBonus")) return changeBonus(resource, line, el);
+    const resource = Resources.get(+line.dataset.id);
+    if (cl.contains("resourceIcon")) return changeIcon(resource, line, el);
+    if (cl.contains("resourceCategory")) return changeCategory(resource, line, el);
+    if (cl.contains("resourceModel")) return changeModel(resource, line, el);
+    if (cl.contains("resourceBonus")) return changeBonus(resource, line, el);
     if (cl.contains("icon-pin")) return pinResource(resource, el);
     if (cl.contains("icon-trash-empty")) return removeResource(resource, line);
   });
@@ -46,10 +46,10 @@ function editGoods() {
     const el = ev.target,
       cl = el.classList,
       line = el.parentNode;
-    const resource = Goods.get(+line.dataset.id);
-    if (cl.contains("goodName")) return changeName(resource, el.value, line);
-    if (cl.contains("goodValue")) return changeValue(resource, el.value, line);
-    if (cl.contains("goodChance")) return changeChance(resource, el.value, line);
+    const resource = Resources.get(+line.dataset.id);
+    if (cl.contains("resourceName")) return changeName(resource, el.value, line);
+    if (cl.contains("resourceValue")) return changeValue(resource, el.value, line);
+    if (cl.contains("resourceChance")) return changeChance(resource, el.value, line);
   });
 
   function getBonusIcon(bonus) {
@@ -65,12 +65,12 @@ function editGoods() {
   }
 
   // add line for each resource
-  function goodsEditorAddLines() {
+  function resourcesEditorAddLines() {
     const addTitle = (string, max) => (string.length < max ? "" : `title="${string}"`);
     let lines = "";
 
-    for (const r of pack.goods) {
-      const stroke = Goods.getStroke(r.color);
+    for (const r of pack.resources) {
+      const stroke = Resources.getStroke(r.color);
       const model = r.model.replaceAll("_", " ");
       const bonusArray = Object.entries(r.bonus)
         .map(e => Array(e[1]).fill(e[0]))
@@ -80,31 +80,31 @@ function editGoods() {
         .map(e => e.join(": "))
         .join("; ");
 
-      lines += `<div class="states goods"
+      lines += `<div class="states resources"
           data-id=${r.i} data-name="${r.name}" data-color="${r.color}"
           data-category="${r.category}" data-chance="${r.chance}" data-bonus="${bonusString}"
           data-value="${r.value}" data-model="${r.model}" data-cells="${r.cells}">
-        <svg data-tip="Good icon. Click to change" width="2em" height="2em" class="goodIcon">
+        <svg data-tip="Resource icon. Click to change" width="2em" height="2em" class="resourceIcon">
           <circle cx="50%" cy="50%" r="42%" fill="${r.color}" stroke="${stroke}"/>
           <use href="#${r.icon}" x="10%" y="10%" width="80%" height="80%"/>
         </svg>
-        <input data-tip="Good name. Click and category to change" class="goodName" value="${r.name}" autocorrect="off" spellcheck="false">
-        <div data-tip="Good category. Select to change" class="goodCategory">${r.category}</div>
-        <input data-tip="Good generation chance in eligible cell. Click and type to change" class="goodChance" value="${r.chance}" type="number" min=0 max=100 step=.1 />
-        <div data-tip="Number of cells with good" class="goodCells">${r.cells}</div>
+        <input data-tip="Resource name. Click and category to change" class="resourceName" value="${r.name}" autocorrect="off" spellcheck="false">
+        <div data-tip="Resource category. Select to change" class="resourceCategory">${r.category}</div>
+        <input data-tip="Resource generation chance in eligible cell. Click and type to change" class="resourceChance" value="${r.chance}" type="number" min=0 max=100 step=.1 />
+        <div data-tip="Number of cells with resource" class="resourceCells">${r.cells}</div>
 
-        <div data-tip="Good spread model. Click to change" class="goodModel hide" ${addTitle(model, 8)}>${model}</div>
-        <input data-tip="Good basic value. Click and type to change" class="goodValue hide" value="${r.value}" type="number" min=0 max=100 step=1 />
-        <div data-tip="Good bonus. Click to change" class="goodBonus hide" title="${bonusString}">${bonusHTML || "<span style='opacity:0'>place</span>"}</div>
+        <div data-tip="Resource spread model. Click to change" class="resourceModel hide" ${addTitle(model, 8)}>${model}</div>
+        <input data-tip="Resource basic value. Click and type to change" class="resourceValue hide" value="${r.value}" type="number" min=0 max=100 step=1 />
+        <div data-tip="Resource bonus. Click to change" class="resourceBonus hide" title="${bonusString}">${bonusHTML || "<span style='opacity:0'>place</span>"}</div>
 
-        <span data-tip="Toggle good exclusive visibility (pin)" class="icon-pin inactive hide"></span>
-        <span data-tip="Remove good" class="icon-trash-empty hide"></span>
+        <span data-tip="Toogle resource exclusive visibility (pin)" class="icon-pin inactive hide"></span>
+        <span data-tip="Remove resource" class="icon-trash-empty hide"></span>
       </div>`;
     }
     body.innerHTML = lines;
 
     // update footer
-    document.getElementById("goodsNumber").innerHTML = pack.goods.length;
+    document.getElementById("resourcesNumber").innerHTML = pack.resources.length;
 
     // add listeners
     body.querySelectorAll("div.states").forEach(el => el.addEventListener("click", selectResourceOnLineClick));
@@ -113,12 +113,12 @@ function editGoods() {
       body.dataset.type = "absolute";
       togglePercentageMode();
     }
-    applySorting(goodsHeader);
-    $("#goodsEditor").dialog({width: fitContent()});
+    applySorting(resourcesHeader);
+    $("#resourcesEditor").dialog({width: fitContent()});
   }
 
   function changeCategory(resource, line, el) {
-    const categories = [...new Set(pack.goods.map(r => r.category))].sort();
+    const categories = [...new Set(pack.resources.map(r => r.category))].sort();
     const categoryOptions = category =>
       categories.map(c => `<option ${c === category ? "selected" : ""} value="${c}">${c}</option>`).join("");
 
@@ -158,13 +158,13 @@ function editGoods() {
 
   function changeModel(resource, line, el) {
     const model = line.dataset.model;
-    const modelOptions = Object.keys(Goods.models)
+    const modelOptions = Object.keys(Resources.models)
       .sort()
       .map(m => `<option ${m === model ? "selected" : ""} value="${m}">${m.replaceAll("_", " ")}</option>`)
       .join("");
     const wikiURL = "https://github.com/Azgaar/Fantasy-Map-Generator/wiki/Resources:-spread-functions";
     const onSelect =
-      "resouceModelFunction.innerHTML = Goods.models[this.value] || ' '; resouceModelCustomName.value = ''; resouceModelCustomFunction.value = ''";
+      "resouceModelFunction.innerHTML = Resources.models[this.value] || ' '; resouceModelCustomName.value = ''; resouceModelCustomFunction.value = ''";
 
     alertMessage.innerHTML = `
       <fieldset data-tip="Select one of the predefined spread models from the list" style="border: 1px solid #999; margin-bottom: 1em">
@@ -180,7 +180,7 @@ function editGoods() {
         <div style="margin-bottom:.2em">
           <div style="display: inline-block; width: 6em">Function:</div>
           <div id="resouceModelFunction" style="display: inline-block; width: 18em; font-family: monospace; border: 1px solid #ccc; padding: 3px; font-size: .95em;vertical-align: middle">
-            ${Goods.models[model] || " "}
+            ${Resources.models[model] || " "}
           </div>
         </div>
       </fieldset>
@@ -198,7 +198,7 @@ function editGoods() {
         </div>
       </fieldset>
 
-      <div id="goodModelMessage" style="color: #b20000; margin: .4em 1em 0"></div>
+      <div id="resourceModelMessage" style="color: #b20000; margin: .4em 1em 0"></div>
     `;
 
     $("#alert").dialog({
@@ -219,16 +219,16 @@ function editGoods() {
       const customName = document.getElementById("resouceModelCustomName").value;
       const customFn = document.getElementById("resouceModelCustomFunction").value;
 
-      const message = document.getElementById("goodModelMessage");
+      const message = document.getElementById("resourceModelMessage");
       if (customName && !customFn) return (message.innerHTML = "Error. Custom model function is required");
       if (!customName && customFn) return (message.innerHTML = "Error. Custom model name is required");
       message.innerHTML = "";
 
       if (customName && customFn) {
         try {
-          const allMethods = "{" + Object.keys(Goods.methods).join(", ") + "}";
+          const allMethods = "{" + Object.keys(Resources.methods).join(", ") + "}";
           const fn = new Function(allMethods, "return " + customFn);
-          fn({...Goods.methods});
+          fn({...Resources.methods});
         } catch (err) {
           message.innerHTML = "Error. " + err.message || err;
           return;
@@ -251,12 +251,12 @@ function editGoods() {
   }
 
   function changeBonus(resource, line, el) {
-    const bonuses = [...new Set(pack.goods.map(r => Object.keys(r.bonus)).flat())].sort();
+    const bonuses = [...new Set(pack.resources.map(r => Object.keys(r.bonus)).flat())].sort();
     const inputs = bonuses.map(
       bonus => `<div style="margin-bottom:.2em">
         ${getBonusIcon(bonus)}
         <div style="display: inline-block; width: 8em">${capitalize(bonus)}</div>
-        <input id="goodBonus_${bonus}" style="width: 4.1em" type="number" step="1" min="0" max="9" value="${resource.bonus[bonus] || 0}" />
+        <input id="resourceBonus_${bonus}" style="width: 4.1em" type="number" step="1" min="0" max="9" value="${resource.bonus[bonus] || 0}" />
       </div>`
     );
 
@@ -278,7 +278,7 @@ function editGoods() {
     function applyChanges() {
       const bonusObj = {};
       bonuses.forEach(bonus => {
-        const el = document.getElementById("goodBonus_" + bonus);
+        const el = document.getElementById("resourceBonus_" + bonus);
         const value = parseInt(el.value);
         if (isNaN(value) || !value) return;
         bonusObj[bonus] = value;
@@ -308,7 +308,9 @@ function editGoods() {
   }
 
   function changeIcon(resource, line, el) {
-    const standardIcons = Array.from(document.getElementById("good-icons").querySelectorAll("symbol")).map(el => el.id);
+    const standardIcons = Array.from(document.getElementById("resource-icons").querySelectorAll("symbol")).map(
+      el => el.id
+    );
     const standardIconsOptions = standardIcons.map(icon => `<option value=${icon}>${icon}</option>`);
 
     const customIconsEl = document.getElementById("defs-icons");
@@ -317,17 +319,17 @@ function editGoods() {
       : [];
     const customIconsOptions = customIcons.map(icon => `<option value=${icon}>${icon}</option>`);
 
-    const select = document.getElementById("goodSelectIcon");
+    const select = document.getElementById("resourceSelectIcon");
     select.innerHTML = standardIconsOptions + customIconsOptions;
     select.value = resource.icon;
 
-    const preview = document.getElementById("goodIconPreview");
+    const preview = document.getElementById("resourceIconPreview");
     preview.setAttribute("href", "#" + resource.icon);
 
-    const viewBoxSection = document.getElementById("goodIconEditorViewboxFields");
+    const viewBoxSection = document.getElementById("resourceIconEditorViewboxFields");
     viewBoxSection.style.display = "none";
 
-    $("#goodIconEditor").dialog({
+    $("#resourceIconEditor").dialog({
       resizable: false,
       title: "Change Icon",
       buttons: {
@@ -339,8 +341,8 @@ function editGoods() {
           $(this).dialog("close");
 
           resource.icon = select.value;
-          line.querySelector("svg.goodIcon > use").setAttribute("href", "#" + select.value);
-          drawGoods();
+          line.querySelector("svg.resourceIcon > use").setAttribute("href", "#" + select.value);
+          drawResources();
         }
       },
       position: {my: "center bottom", at: "center", of: "svg"}
@@ -374,8 +376,8 @@ function editGoods() {
 
     // add listeners
     select.onchange = () => preview.setAttribute("href", "#" + select.value);
-    document.getElementById("goodUploadIconRaster").onclick = () => imageToLoad.click();
-    document.getElementById("goodUploadIconVector").onclick = () => svgToLoad.click();
+    document.getElementById("resourceUploadIconRaster").onclick = () => imageToLoad.click();
+    document.getElementById("resourceUploadIconVector").onclick = () => svgToLoad.click();
     document.getElementById("imageToLoad").onchange = () => uploadImage("image", uploadTo, onUpload);
     document.getElementById("svgToLoad").onchange = () => uploadImage("svg", uploadTo, onUpload);
   }
@@ -396,7 +398,7 @@ function editGoods() {
     const reader = new FileReader();
     reader.onload = function (readerEvent) {
       const result = readerEvent.target.result;
-      const id = "good-custom-" + Math.random().toString(36).slice(-6);
+      const id = "resource-custom-" + Math.random().toString(36).slice(-6);
 
       if (type === "image") {
         const svg = `<svg id="${id}" xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><image x="0" y="0" width="200" height="200" href="${result}"/></svg>`;
@@ -441,7 +443,7 @@ function editGoods() {
     const circle = el.querySelector("circle");
 
     const callback = fill => {
-      const stroke = Goods.getStroke(fill);
+      const stroke = Resources.getStroke(fill);
       circle.setAttribute("fill", fill);
       circle.setAttribute("stroke", stroke);
       resource.color = fill;
@@ -453,18 +455,18 @@ function editGoods() {
     openPicker(resource.color, callback, {allowHatching: false});
   }
 
-  function regenerateCurrentGoods() {
-    const message = "Are you sure you want to regenerate goods? <br>This action cannot be reverted";
-    confirmationDialog({title: "Regenerate goods", message, confirm: "Regenerate", onConfirm: regenerateGoods});
+  function regenerateCurrentResources() {
+    const message = "Are you sure you want to regenerate resources? <br>This action cannot be reverted";
+    confirmationDialog({title: "Regenerate resources", message, confirm: "Regenerate", onConfirm: regenerateResources});
   }
 
-  function goodsRestoreDefaults() {
-    const message = "Are you sure you want to restore default goods? <br>This action cannot be reverted";
+  function resourcesRestoreDefaults() {
+    const message = "Are you sure you want to restore default resources? <br>This action cannot be reverted";
     const onConfirm = () => {
-      delete pack.goods;
-      regenerateGoods();
+      delete pack.resources;
+      regenerateResources();
     };
-    confirmationDialog({title: "Restore default goods", message, confirm: "Restore", onConfirm});
+    confirmationDialog({title: "Restore default resources", message, confirm: "Restore", onConfirm});
   }
 
   function toggleLegend() {
@@ -473,24 +475,24 @@ function editGoods() {
       return;
     }
 
-    const data = pack.goods
+    const data = pack.resources
       .filter(r => r.i && r.cells)
       .sort((a, b) => b.cells - a.cells)
       .map(r => [r.i, r.color, r.name]);
-    drawLegend("Goods", data);
+    drawLegend("Resources", data);
   }
 
   function togglePercentageMode() {
     if (body.dataset.type === "absolute") {
       body.dataset.type = "percentage";
-      const totalCells = pack.cells.good.filter(r => r !== 0).length;
+      const totalCells = pack.cells.resource.filter(r => r !== 0).length;
 
       body.querySelectorAll(":scope > div").forEach(function (el) {
-        el.querySelector(".goodCells").innerHTML = rn((+el.dataset.cells / totalCells) * 100) + "%";
+        el.querySelector(".resourceCells").innerHTML = rn((+el.dataset.cells / totalCells) * 100) + "%";
       });
     } else {
       body.dataset.type = "absolute";
-      goodsEditorAddLines();
+      resourcesEditorAddLines();
     }
   }
 
@@ -498,7 +500,7 @@ function editGoods() {
     if (this.classList.contains("pressed")) return exitResourceAssignMode();
     customization = 14;
     this.classList.add("pressed");
-    if (!layerIsOn("toggleGoods")) toggleGoods();
+    if (!layerIsOn("toggleResources")) toggleResources();
     if (!layerIsOn("toggleCells")) {
       const toggler = document.getElementById("toggleCells");
       toggler.dataset.forced = true;
@@ -506,22 +508,22 @@ function editGoods() {
     }
 
     document
-      .getElementById("goodsEditor")
+      .getElementById("resourcesEditor")
       .querySelectorAll(".hide")
       .forEach(el => el.classList.add("hidden"));
-    document.getElementById("goodsFooter").style.display = "none";
+    document.getElementById("resourcesFooter").style.display = "none";
     body
-      .querySelectorAll(".goodName, .goodCategory, .goodChance, .goodCells, svg")
+      .querySelectorAll(".resourceName, .resourceCategory, .resourceChance, .resourceCells, svg")
       .forEach(e => (e.style.pointerEvents = "none"));
-    $("#goodsEditor").dialog({position: {my: "right top", at: "right-10 top+10", of: "svg", collision: "fit"}});
+    $("#resourcesEditor").dialog({position: {my: "right top", at: "right-10 top+10", of: "svg", collision: "fit"}});
 
-    tip("Select good line in editor, click on cells to remove or add a good", true);
+    tip("Select resource line in editor, click on cells to remove or add a resource", true);
     viewbox.on("click", changeResourceOnCellClick);
 
     body.querySelector("div")?.classList.add("selected");
 
-    const someArePinned = pack.goods.some(resource => resource.pinned);
-    if (someArePinned) unpinAllGoods();
+    const someArePinned = pack.resources.some(resource => resource.pinned);
+    if (someArePinned) unpinAllResources();
   }
 
   function selectResourceOnLineClick() {
@@ -537,29 +539,29 @@ function editGoods() {
     const selected = body.querySelector("div.selected");
     if (!selected) return;
 
-    if (pack.cells.good[i]) {
-      const resourceToRemove = Goods.get(pack.cells.good[i]);
+    if (pack.cells.resource[i]) {
+      const resourceToRemove = Resources.get(pack.cells.resource[i]);
       if (resourceToRemove) {
         resourceToRemove.cells -= 1;
-        body.querySelector("div.states[data-id='" + resourceToRemove.i + "'] > .goodCells").innerHTML =
+        body.querySelector("div.states[data-id='" + resourceToRemove.i + "'] > .resourceCells").innerHTML =
           resourceToRemove.cells;
       }
-      pack.cells.good[i] = 0;
+      pack.cells.resource[i] = 0;
     } else {
       const resourceId = +selected.dataset.id;
-      const resource = Goods.get(resourceId);
+      const resource = Resources.get(resourceId);
       resource.cells += 1;
-      body.querySelector("div.states[data-id='" + resourceId + "'] > .goodCells").innerHTML = resource.cells;
-      pack.cells.good[i] = resourceId;
+      body.querySelector("div.states[data-id='" + resourceId + "'] > .resourceCells").innerHTML = resource.cells;
+      pack.cells.resource[i] = resourceId;
     }
 
     goods.selectAll("*").remove();
-    drawGoods();
+    drawResources();
   }
 
   function exitResourceAssignMode(close) {
     customization = 0;
-    document.getElementById("goodsAssign").classList.remove("pressed");
+    document.getElementById("resourcesAssign").classList.remove("pressed");
 
     if (layerIsOn("toggleCells")) {
       const toggler = document.getElementById("toggleCells");
@@ -568,15 +570,15 @@ function editGoods() {
     }
 
     document
-      .getElementById("goodsEditor")
+      .getElementById("resourcesEditor")
       .querySelectorAll(".hide")
       .forEach(el => el.classList.remove("hidden"));
-    document.getElementById("goodsFooter").style.display = "block";
+    document.getElementById("resourcesFooter").style.display = "block";
     body
-      .querySelectorAll(".goodName, .goodCategory, .goodChance, .goodCells, svg")
+      .querySelectorAll(".resourceName, .resourceCategory, .resourceChance, .resourceCells, svg")
       .forEach(e => delete e.style.pointerEvents);
     !close &&
-      $("#goodsEditor").dialog({position: {my: "right top", at: "right-10 top+10", of: "svg", collision: "fit"}});
+      $("#resourcesEditor").dialog({position: {my: "right top", at: "right-10 top+10", of: "svg", collision: "fit"}});
 
     restoreDefaultEvents();
     clearMainTip();
@@ -584,18 +586,18 @@ function editGoods() {
     if (selected) selected.classList.remove("selected");
   }
 
-  function goodAdd() {
-    if (pack.goods.length >= 256) return tip("Maximum number of goods is reached", false, "error");
+  function resourceAdd() {
+    if (pack.resources.length >= 256) return tip("Maximum number of resources is reached", false, "error");
 
-    let i = last(pack.goods).i;
-    while (Goods.get(i)) {
+    let i = last(pack.resources).i;
+    while (Resources.get(i)) {
       i++;
     }
     const resource = {
       i,
-      name: "Good" + i,
+      name: "Resource" + i,
       category: "Unknown",
-      icon: "good-unknown",
+      icon: "resource-unknown",
       color: "#ff5959",
       value: 1,
       chance: 10,
@@ -603,13 +605,13 @@ function editGoods() {
       bonus: {population: 1},
       cells: 0
     };
-    pack.goods.push(resource);
-    tip("Good is added", false, "success", 3000);
-    goodsEditorAddLines();
+    pack.resources.push(resource);
+    tip("Resource is added", false, "success", 3000);
+    resourcesEditorAddLines();
   }
 
-  function downloadGoodsData() {
-    let data = "Id,Good,Color,Category,Value,Bonus,Chance,Model,Cells\n"; // headers
+  function downloadResourcesData() {
+    let data = "Id,Resource,Color,Category,Value,Bonus,Chance,Model,Cells\n"; // headers
 
     body.querySelectorAll(":scope > div").forEach(function (el) {
       data += el.dataset.id + ",";
@@ -623,7 +625,7 @@ function editGoods() {
       data += el.dataset.cells + "\n";
     });
 
-    const name = getFileName("Goods") + ".csv";
+    const name = getFileName("Resources") + ".csv";
     downloadFile(data, name);
   }
 
@@ -635,20 +637,20 @@ function editGoods() {
     else delete resource.pinned;
 
     goods.selectAll("*").remove();
-    drawGoods();
+    drawResources();
 
     // manage top unpin all button state
-    const someArePinned = pack.goods.some(resource => resource.pinned);
-    const unpinAll = document.getElementById("goodsUnpinAll");
+    const someArePinned = pack.resources.some(resource => resource.pinned);
+    const unpinAll = document.getElementById("resourcesUnpinAll");
     someArePinned ? unpinAll.classList.remove("hidden") : unpinAll.classList.add("hidden");
   }
 
-  function unpinAllGoods() {
-    pack.goods.forEach(resource => delete resource.pinned);
+  function unpinAllResources() {
+    pack.resources.forEach(resource => delete resource.pinned);
     goods.selectAll("*").remove();
-    drawGoods();
+    drawResources();
 
-    document.getElementById("goodsUnpinAll").classList.add("hidden");
+    document.getElementById("resourcesUnpinAll").classList.add("hidden");
     body.querySelectorAll(":scope > div > span.icon-pin").forEach(el => el.classList.add("inactive"));
   }
 
@@ -658,24 +660,24 @@ function editGoods() {
     const message = "Are you sure you want to remove the resource? <br>This action cannot be reverted";
     const onConfirm = () => {
       for (const i of pack.cells.i) {
-        if (pack.cells.good[i] === res.i) {
-          pack.cells.good[i] = 0;
+        if (pack.cells.resource[i] === res.i) {
+          pack.cells.resource[i] = 0;
         }
       }
 
-      pack.goods = pack.goods.filter(resource => resource.i !== res.i);
+      pack.resources = pack.resources.filter(resource => resource.i !== res.i);
       line.remove();
-      document.getElementById("goodsNumber").innerHTML = pack.goods.length;
+      document.getElementById("resourcesNumber").innerHTML = pack.resources.length;
 
       goods.selectAll("*").remove();
-      drawGoods();
+      drawResources();
     };
     confirmationDialog({title: "Remove resource", message, confirm: "Remove", onConfirm});
   }
 
-  function closeGoodsEditor() {
+  function closeResourcesEditor() {
     if (customization === 14) exitResourceAssignMode("close");
-    unpinAllGoods();
+    unpinAllResources();
     body.innerHTML = "";
   }
 }

@@ -372,8 +372,8 @@ function selectStyleElement() {
   if (styleElement === "goods") {
     styleStrokeWidth.style.display = "block";
     styleStrokeWidthInput.value = el.attr("stroke-width") || "";
-    styleGoods.style.display = "block";
-    styleGoodsCircle.checked = +el.attr("data-circle");
+    styleResources.style.display = "block";
+    styleResourcesCircle.checked = +el.attr("data-circle");
   }
 
   // update group options
@@ -966,10 +966,10 @@ emblemsBurgSizeInput.on("change", e => {
   drawEmblems();
 });
 
-styleGoodsCircle.addEventListener("change", function () {
+styleResourcesCircle.addEventListener("change", function () {
   goods.attr("data-circle", +this.checked);
   goods.selectAll("*").remove();
-  drawGoods();
+  drawResources();
 });
 
 // request a URL to image to be used as a texture

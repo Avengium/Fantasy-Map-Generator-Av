@@ -2,8 +2,8 @@ name: Bump version on PR merge
 
 on:
   pull_request:
-    branches: [ master ]
-    types: [ closed ]
+    branches: [master]
+    types: [closed]
 
 permissions:
   contents: write

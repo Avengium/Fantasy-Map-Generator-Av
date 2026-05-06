@@ -2445,10 +2445,3 @@ svg.button {
   line-height: 1;
   box-sizing: border-box;
 }
-
-.ui-dialog .ui-dialog-titlebar .ui-button-icon-only .ui-icon {
-  position: static;
-  top: auto;
-  left: auto;
-  margin: 0;
-}

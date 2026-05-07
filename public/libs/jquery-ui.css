@@ -328,8 +328,13 @@ body .ui-dialog {
 }
 
 .ui-dialog .ui-dialog-titlebar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 3px;
   margin-left: 5px;
+  line-height: 1;
+  box-sizing: border-box;
   width: 19px;
   height: 18px;
   color: #ffffff;

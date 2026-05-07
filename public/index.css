@@ -2435,13 +2435,3 @@ svg.button {
     background: #25252a;
   }
 }
-
-/* Ensure dialog titlebar window controls are centered */
-.ui-dialog .ui-dialog-titlebar button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  line-height: 1;
-  box-sizing: border-box;
-}

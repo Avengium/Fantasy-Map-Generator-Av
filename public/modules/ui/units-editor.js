@@ -21,7 +21,7 @@ function editUnits() {
   ensureEl("distanceScaleInput").on("change", changeDistanceScale);
   ensureEl("heightUnit").on("change", changeHeightUnit);
   ensureEl("heightExponentInput").on("input", changeHeightExponent);
-  ensureEl("heightLegend").on("click", toggleLegend);
+  ensureEl("altitudeLegend").on("click", toggleLegend);
   ensureEl("temperatureScale").on("change", changeTemperatureScale);
 
   ensureEl("populationRateInput").on("change", changePopulationRate);
@@ -69,13 +69,6 @@ function editUnits() {
     calculateTemperatures();
     if (layerIsOn("toggleTemperature")) drawTemperature();
     updateLegendIfVisible();
-  }
-
-  function toggleLegend() {
-    if (legend.selectAll("*").size()) {
-      clearLegend();
-      return;
-    } // hide legend
   }
 
   function changeTemperatureScale() {
@@ -139,38 +132,38 @@ function editUnits() {
   }
 
   function updateAndDisplayLegend() {
-    let arr = pack.cells.h;
-    let countMap = arr.reduce(
-      (map, value) => { map.set(value, (map.get(value) || 0) + 1); return map },
-      new Map()
-    );
+    const heights = pack.cells.h;
+    const countByHeight = new Map();
+    for (const h of heights) countByHeight.set(h, (countByHeight.get(h) || 0) + 1);
+
     const exponent = +heightExponentInput.value;
     const scheme = getColorScheme();
 
-    // Get the selected height unit
-    const heightUnit = document.getElementById('heightUnit').value;
-    const heightUnitName = heightUnit === 'custom_name' 
-      ? document.getElementById('heightUnit').nextElementSibling.value 
-      : document.getElementById('heightUnit').selectedOptions[0].text.match(/\(([^)]+)\)/)[1];
+    const heightUnitSelect = ensureEl("heightUnit");
+    const heightUnitName =
+      heightUnitSelect.value === "custom_name"
+        ? heightUnitSelect.nextElementSibling?.value || ""
+        : (heightUnitSelect.selectedOptions[0]?.text.match(/\(([^)]+)\)/)?.[1] ?? "");
 
-    const hmap = [];
-    countMap.forEach(function (mcount, mheight) {
-      const v = 1 - (mheight < 20 ? mheight - 5 : mheight) / 100;
+    const heightLevels = [];
+    countByHeight.forEach((count, height) => {
+      const v = 1 - (height < 20 ? height - 5 : height) / 100;
       const sRGB = scheme(v);
-      const a = mheight < 20 ? 0 : Math.pow(mheight - 18, exponent);
-      hmap.push({ height: mheight, count: mcount, altitude: a, color: sRGB });
+      const altitude = height < 20 ? 0 : Math.pow(height - 18, exponent);
+      heightLevels.push({height, count, altitude, color: sRGB});
     });
 
-    // Sort hmap by height
-    hmap.sort((a, b) => a.height - b.height);
+    // Sort by height
+    heightLevels.sort((a, b) => a.height - b.height);
 
     // Select a representative sample of heights across the range
-    const totalSamples = 10; // Adjust this number to change the number of legend items
-    const step = Math.max(1, Math.floor(hmap.length / totalSamples));
-    const sampledHmap = hmap.filter((_, index) => index % step === 0 || index === hmap.length - 1);
+    const totalSamples = 10;
+    const step = Math.max(1, Math.floor(heightLevels.length / totalSamples));
+    const sampled = heightLevels.filter(
+      (_, index) => index % step === 0 || index === heightLevels.length - 1
+    );
 
-    const data = sampledHmap
-      .map(c => [rn(c.height, 0), c.color, rn(c.altitude, 1)]);
+    const data = sampled.map(c => [rn(c.height, 0), c.color, rn(c.altitude, 1)]);
 
     // Set the number of items per column
     styleLegendColItems.value = data.length;
@@ -184,13 +177,13 @@ function editUnits() {
 
     // Adjust legend position to ensure it's fully visible
     const legendBox = legend.select("#legendBox");
-    const legendWidth = legendBox.attr("width");
-    const legendHeight = legendBox.attr("height");
+    const legendWidth = +legendBox.attr("width");
+    const legendHeight = +legendBox.attr("height");
     const svgWidth = +d3.select("svg").attr("width");
     const svgHeight = +d3.select("svg").attr("height");
 
-    let x = Math.max(10, Math.min(svgWidth - legendWidth - 10, +legend.attr("data-x") / 100 * svgWidth));
-    let y = Math.max(10, Math.min(svgHeight - legendHeight - 10, +legend.attr("data-y") / 100 * svgHeight));
+    const x = Math.max(10, Math.min(svgWidth - legendWidth - 10, (+legend.attr("data-x") / 100) * svgWidth));
+    const y = Math.max(10, Math.min(svgHeight - legendHeight - 10, (+legend.attr("data-y") / 100) * svgHeight));
 
     legend.attr("transform", `translate(${x},${y})`);
   }

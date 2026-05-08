@@ -137,7 +137,11 @@ function editUnits() {
     for (const h of heights) countByHeight.set(h, (countByHeight.get(h) || 0) + 1);
 
     const exponent = +heightExponentInput.value;
-    const scheme = getColorScheme();
+    const schemeName =
+      terrs.select("#landHeights").attr("scheme") ||
+      terrs.select("#oceanHeights").attr("scheme") ||
+      "bright";
+    const scheme = getColorScheme(schemeName);
 
     const heightUnitSelect = ensureEl("heightUnit");
     const heightUnitName =

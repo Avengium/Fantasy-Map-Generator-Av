@@ -57,12 +57,15 @@ function editUnits() {
   }
 
   function changeHeightUnit() {
-    if (this.value !== "custom_name") return;
-
-    prompt("Provide a custom name for a height unit", {default: ""}, custom => {
-      this.options.add(new Option(custom, custom, false, true));
-      lock("heightUnit");
-    });
+    if (this.value === "custom_name") {
+      prompt("Provide a custom name for a height unit", {default: ""}, custom => {
+        this.options.add(new Option(custom, custom, false, true));
+        lock("heightUnit");
+        updateLegendIfVisible();
+      });
+      return;
+    }
+    updateLegendIfVisible();
   }
 
   function changeHeightExponent() {
@@ -119,6 +122,8 @@ function editUnits() {
     localStorage.removeItem("populationRate");
     localStorage.removeItem("urbanization");
     localStorage.removeItem("urbanDensity");
+
+    updateLegendIfVisible();
   }
 
   function toggleLegend() {
@@ -179,10 +184,13 @@ function editUnits() {
     const scheme = getColorScheme(schemeName);
 
     const heightUnitSelect = ensureEl("heightUnit");
+    const selectedOpt = heightUnitSelect.selectedOptions[0];
+    const selectedText = selectedOpt?.text?.trim() ?? "";
+    const parenAbbrev = selectedText.match(/\(([^)]+)\)/)?.[1];
     const heightUnitName =
       heightUnitSelect.value === "custom_name"
-        ? heightUnitSelect.nextElementSibling?.value || ""
-        : (heightUnitSelect.selectedOptions[0]?.text.match(/\(([^)]+)\)/)?.[1] ?? "");
+        ? heightUnitSelect.nextElementSibling?.value || selectedText
+        : (parenAbbrev ?? selectedText) || heightUnitSelect.value;
 
     const sampled = cache.sampledHeights.map(height => {
       const v = 1 - (height < 20 ? height - 5 : height) / 100;
@@ -211,6 +219,7 @@ function editUnits() {
       updateAndDisplayLegend();
     }
   }
+  window.updateLegendIfVisible = updateLegendIfVisible;
 
   function addRuler() {
     if (!layerIsOn("toggleRulers")) toggleRulers();

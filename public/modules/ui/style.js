@@ -585,6 +585,7 @@ outlineLayers.on("change", function () {
 styleHeightmapScheme.on("change", function () {
   getEl().attr("scheme", this.value);
   drawHeightmap();
+  window.updateLegendIfVisible?.();
 });
 
 openCreateHeightmapSchemeButton.on("click", function () {

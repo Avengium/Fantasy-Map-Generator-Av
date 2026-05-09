@@ -172,7 +172,6 @@ function editUnits() {
     const cache = getLegendHeightsCache();
     if (!cache) return;
 
-    const exponent = +heightExponentInput.value;
     const schemeName =
       terrs.select("#landHeights").attr("scheme") ||
       terrs.select("#oceanHeights").attr("scheme") ||
@@ -188,11 +187,10 @@ function editUnits() {
     const sampled = cache.sampledHeights.map(height => {
       const v = 1 - (height < 20 ? height - 5 : height) / 100;
       const sRGB = scheme(v);
-      const altitude = height < 20 ? 0 : Math.pow(height - 18, exponent);
-      return {height, altitude, color: sRGB};
+      return {height, color: sRGB};
     });
 
-    const data = sampled.map(c => [rn(c.height, 0), c.color, rn(c.altitude, 1)]);
+    const data = sampled.map(c => [rn(c.height, 0), c.color, getHeight(c.height)]);
 
     // Set the number of items per column
     styleLegendColItems.value = data.length;

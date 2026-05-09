@@ -131,10 +131,46 @@ function editUnits() {
     }
   }
 
-  function updateAndDisplayLegend() {
-    const heights = pack.cells.h;
+  let legendHeightsCache = null;
+
+  function getLegendHeightsCache() {
+    const heights = pack?.cells?.h;
+    if (!heights) return null;
+
+    if (
+      legendHeightsCache &&
+      legendHeightsCache.heightsRef === heights &&
+      legendHeightsCache.heightsLen === heights.length
+    ) {
+      return legendHeightsCache;
+    }
+
     const countByHeight = new Map();
     for (const h of heights) countByHeight.set(h, (countByHeight.get(h) || 0) + 1);
+
+    const sortedHeights = Array.from(countByHeight.keys()).sort((a, b) => a - b);
+
+    // Select a representative sample of heights across the range
+    const totalSamples = 10;
+    const step = Math.max(1, Math.floor(sortedHeights.length / totalSamples));
+    const sampledHeights = sortedHeights.filter(
+      (_, index) => index % step === 0 || index === sortedHeights.length - 1
+    );
+
+    legendHeightsCache = {
+      heightsRef: heights,
+      heightsLen: heights.length,
+      countByHeight,
+      sortedHeights,
+      sampledHeights
+    };
+
+    return legendHeightsCache;
+  }
+
+  function updateAndDisplayLegend() {
+    const cache = getLegendHeightsCache();
+    if (!cache) return;
 
     const exponent = +heightExponentInput.value;
     const schemeName =
@@ -149,23 +185,12 @@ function editUnits() {
         ? heightUnitSelect.nextElementSibling?.value || ""
         : (heightUnitSelect.selectedOptions[0]?.text.match(/\(([^)]+)\)/)?.[1] ?? "");
 
-    const heightLevels = [];
-    countByHeight.forEach((count, height) => {
+    const sampled = cache.sampledHeights.map(height => {
       const v = 1 - (height < 20 ? height - 5 : height) / 100;
       const sRGB = scheme(v);
       const altitude = height < 20 ? 0 : Math.pow(height - 18, exponent);
-      heightLevels.push({height, count, altitude, color: sRGB});
+      return {height, altitude, color: sRGB};
     });
-
-    // Sort by height
-    heightLevels.sort((a, b) => a.height - b.height);
-
-    // Select a representative sample of heights across the range
-    const totalSamples = 10;
-    const step = Math.max(1, Math.floor(heightLevels.length / totalSamples));
-    const sampled = heightLevels.filter(
-      (_, index) => index % step === 0 || index === heightLevels.length - 1
-    );
 
     const data = sampled.map(c => [rn(c.height, 0), c.color, rn(c.altitude, 1)]);
 

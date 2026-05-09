@@ -179,17 +179,8 @@ function editUnits() {
     const bbox = legend.node().getBBox();
     legendLabel.attr("x", bbox.width / 2);
 
-    // Adjust legend position to ensure it's fully visible
-    const legendBox = legend.select("#legendBox");
-    const legendWidth = +legendBox.attr("width");
-    const legendHeight = +legendBox.attr("height");
-    const svgWidth = +d3.select("svg").attr("width");
-    const svgHeight = +d3.select("svg").attr("height");
-
-    const x = Math.max(10, Math.min(svgWidth - legendWidth - 10, (+legend.attr("data-x") / 100) * svgWidth));
-    const y = Math.max(10, Math.min(svgHeight - legendHeight - 10, (+legend.attr("data-y") / 100) * svgHeight));
-
-    legend.attr("transform", `translate(${x},${y})`);
+    // Use shared legend positioning logic (defaults near bottom-right when data-x/y are unset)
+    if (window.fitLegendBox) fitLegendBox();
   }
 
   function updateLegendIfVisible() {

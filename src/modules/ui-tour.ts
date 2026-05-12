@@ -1,5 +1,6 @@
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+
 const byId = (id: string) => document.getElementById(id);
 
 function clickTab(tabId: string) {
@@ -41,7 +42,32 @@ function start() {
   const tour = driver({
     showProgress: true,
     allowClose: true,
+    popoverClass: "fmg-tour",
+    overlayColor: "rgb(0,0,0)",
+    overlayOpacity: 0.75,
+    stagePadding: 4,
+    stageRadius: 4,
+    onPopoverRender: (popover) => {
+      Object.assign(popover.wrapper.style, {
+        backgroundColor: "#ffffff",
+        color: "#000000",
+        border: "1px solid #cccccc",
+        fontFamily: "Georgia, serif",
+      });
+      popover.title.style.color = "#000000";
+      popover.title.style.borderBottomColor = "#cccccc";
+      popover.progress.style.color = "#666666";
+      popover.closeButton.style.color = "#000000";
+      for (const btn of [popover.previousButton, popover.nextButton]) {
+        Object.assign(btn.style, {
+          backgroundColor: "#f0f0f0",
+          border: "1px solid #cccccc",
+          color: "#000000",
+        });
+      }
+    },
     onDestroyStarted: () => {
+      document.removeEventListener("keydown", handleKeydown);
       hideHeightmapCustomizationPanel();
       closeDialogs();
       tour.destroy();
@@ -72,6 +98,9 @@ function start() {
       },
       {
         element: "#tooltip",
+        onHighlightStarted: () => {
+          document.body.classList.add("tour-free-roam");
+        },
         popover: {
           title: "Hover Tooltips",
           description:
@@ -84,6 +113,7 @@ function start() {
         element: "#optionsTrigger",
         onHighlightStarted: () => {
           document.body.classList.remove("tour-free-roam");
+          closeOptionsPanel();
         },
         popover: {
           title: "Open the Options Menu",
@@ -201,6 +231,7 @@ function start() {
       {
         element: "#configureWorld",
         onHighlightStarted: () => {
+          closeDialogs();
           clickTab("optionsTab");
         },
         popover: {
@@ -209,7 +240,6 @@ function start() {
             "This button opens the World Configurator where you can set the map's position on the globe, adjust equatorial and polar temperatures, and configure precipitation to shape the world's climate.",
           side: "right",
           onNextClick: () => {
-            editWorld();
             tour.moveNext();
           },
         },
@@ -217,6 +247,9 @@ function start() {
       {
         element: "#worldConfigurator",
         disableActiveInteraction: false,
+        onHighlightStarted: () => {
+          editWorld();
+        },
         popover: {
           title: "World Configurator",
           description:
@@ -254,7 +287,6 @@ function start() {
             "Open the Heightmap editor to manually sculpt terrain by raising or lowering elevation. Changes here reshape coastlines, rivers, and biomes.",
           side: "right",
           onNextClick: () => {
-            showHeightmapCustomizationPanel();
             tour.moveNext();
           },
         },
@@ -262,6 +294,9 @@ function start() {
       {
         element: "#customizationMenu",
         disableActiveInteraction: false,
+        onHighlightStarted: () => {
+          showHeightmapCustomizationPanel();
+        },
         onDeselected: () => {
           hideHeightmapCustomizationPanel();
         },
@@ -302,13 +337,15 @@ function start() {
       // ── Export / Save / Load ─────────────────────────────────────────────────
       {
         element: "#exportButton",
+        onHighlightStarted: () => {
+          closeDialogs();
+        },
         popover: {
           title: "Export",
           description:
             "Click Export to open the export dialog where you can download the map as an SVG, PNG, or JPEG image, split it into tiles, or export the world data as JSON.",
           side: "top",
           onNextClick: () => {
-            showExportPane();
             tour.moveNext();
           },
         },
@@ -316,6 +353,9 @@ function start() {
       {
         element: "#exportMapData",
         disableActiveInteraction: false,
+        onHighlightStarted: () => {
+          showExportPane();
+        },
         popover: {
           title: "Export Options",
           description:
@@ -343,6 +383,28 @@ function start() {
     ],
   });
 
+  function isEditableTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    if (target.isContentEditable) return true;
+    return !!target.closest(
+      "input, textarea, select, [contenteditable], [contenteditable='plaintext-only']",
+    );
+  }
+
+  function handleKeydown(e: KeyboardEvent): void {
+    if (!tour.isActive() || isEditableTarget(e.target)) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      e.stopPropagation();
+      document.querySelector<HTMLElement>(".driver-popover-next-btn")?.click();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      e.stopPropagation();
+      document.querySelector<HTMLElement>(".driver-popover-prev-btn")?.click();
+    }
+  }
+
+  document.addEventListener("keydown", handleKeydown);
   tour.drive();
 }
 

@@ -1278,11 +1278,23 @@ function editProvinces() {
     });
   }
 
+  function cleanupMergedProvince(provinceId) {
+    // Clean up UI artifacts for a province being merged (similar to removeProvince cleanup)
+    unfog("focusProvince" + provinceId);
+    
+    const coaId = "provinceCOA" + provinceId;
+    if (ensureEl(coaId)) ensureEl(coaId).remove();
+    emblems.select(`#provinceEmblems > use[data-i='${provinceId}']`).remove();
+  }
+
   function mergeProvinces(ids, primary) {
     const primaryProvince = pack.provinces[primary];
+    const provinceIdMap = new Map();
+    
     ids.forEach(id => {
       if (id === primary) return;
       const province = pack.provinces[id];
+      
       // merge burgs
       province.burgs.forEach(b => {
         pack.burgs[b].province = primary;
@@ -1291,21 +1303,32 @@ function editProvinces() {
       if (!primaryProvince.burg && province.burg) {
         primaryProvince.burg = province.burg;
       }
-      // merge cells
-      pack.cells.province.forEach((p, i) => {
-        if (p === id) pack.cells.province[i] = primary;
-      });
+      
+      // Add to map for later cell reassignment
+      provinceIdMap.set(id, primary);
+      
+      // Clean up UI artifacts before marking as removed
+      cleanupMergedProvince(id);
+      
       // remove province
       pack.provinces[id] = {i: id, removed: true};
     });
+    
+    // Single pass over cells to remap all merged province ids at once
+    pack.cells.province.forEach((oldProvinceId, cellIndex) => {
+      const newProvinceId = provinceIdMap.get(oldProvinceId);
+      if (newProvinceId !== undefined) {
+        pack.cells.province[cellIndex] = newProvinceId;
+      }
+    });
+    
     // update state's provinces list
     const state = pack.states[primaryProvince.state];
     state.provinces = state.provinces.filter(p => !pack.provinces[p].removed);
-    // redraw if provinces are visible
-    if (layerIsOn("toggleProvinces")) {
-      toggleProvinces();
-      toggleProvinces();
-    }
+    
+    // redraw if provinces are visible without toggling the layer off/on
+    if (layerIsOn("toggleProvinces")) drawProvinces();
+    if (typeof refreshProvincesEditor === "function") refreshProvincesEditor();
   }
 }
 

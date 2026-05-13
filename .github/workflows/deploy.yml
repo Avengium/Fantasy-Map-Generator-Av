@@ -5,9 +5,7 @@ on:
   push:
     branches: ["master"]
 
-  # Also run after the version bump workflow completes successfully.
-  # This is a fallback in case the bump commit was created by automation
-  # that does not emit a normal push trigger.
+  # Also run after the version bump workflow completes successfully
   workflow_run:
     workflows: ["Bump version on PR merge"]
     types: [completed]

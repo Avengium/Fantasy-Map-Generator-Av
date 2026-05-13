@@ -3,7 +3,7 @@ name: Deploy static content to Pages
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
 
   # Also run after the version bump workflow completes successfully.
   # This is a fallback in case the bump commit was created by automation
@@ -41,7 +41,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: 24
           cache: "npm"
       - name: Install dependencies
         run: npm ci

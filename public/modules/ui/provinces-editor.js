@@ -1326,8 +1326,18 @@ function editProvinces() {
     const state = pack.states[primaryProvince.state];
     state.provinces = state.provinces.filter(p => !pack.provinces[p].removed);
     
-    // redraw if provinces are visible without toggling the layer off/on
+    // recalculate province statistics and poles
+    collectStatistics();
+    Provinces.getPoles();
+    
+    // redraw layers that may have changed
     if (layerIsOn("toggleProvinces")) drawProvinces();
+    if (layerIsOn("toggleBorders")) drawBorders();
+    
+    // clear any fog or debug highlights
+    unfog();
+    debug.selectAll(".highlight").remove();
+    
     if (typeof refreshProvincesEditor === "function") refreshProvincesEditor();
   }
 }

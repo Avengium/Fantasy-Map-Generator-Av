@@ -542,6 +542,7 @@ function editProvinces() {
     ensureEl("provinceNameEditorShortRandom").on("click", regenerateShortNameRandom);
     ensureEl("provinceNameEditorAddForm").on("click", addCustomForm);
     ensureEl("provinceNameEditorFullRegenerate").on("click", regenerateFullName);
+    ensureEl("provinceLocate").on("click", () => locateProvince(province));
 
     function regenerateShortNameCulture() {
       const province = +provinceNameEditor.dataset.province;
@@ -1156,6 +1157,13 @@ function editProvinces() {
     if (customization === 11) exitProvincesManualAssignment("close");
     if (customization === 12) exitAddProvinceMode();
   }
+}
+
+function locateProvince(p) {
+  if (!provs) return;
+  const provinceElement = provs.select("#province" + p).node();
+  if (!provinceElement) return;
+  highlightElement(provinceElement, 8);
 }
 
 function updateLockStatus(provinceId, classList) {

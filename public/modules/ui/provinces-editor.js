@@ -51,7 +51,7 @@ function editProvinces() {
     else if (cl.contains("coaIcon")) editEmblem("province", "provinceCOA" + p, pack.provinces[p]);
     else if (cl.contains("icon-star-empty")) capitalZoomIn(p);
     else if (cl.contains("icon-flag-empty")) triggerIndependencePromps(p);
-    else if (cl.contains("icon-dot-circled")) overviewBurgs({stateId});
+    else if (cl.contains("icon-target")) overviewBurgs({stateId});
     else if (cl.contains("culturePopulation")) changePopulation(p);
     else if (cl.contains("icon-pin")) toggleFog(p, cl);
     else if (cl.contains("icon-trash-empty")) removeProvince(p);
@@ -168,7 +168,7 @@ function editProvinces() {
           ${p.burgs.length ? getCapitalOptions(p.burgs, p.burg) : ""}
         </select>
         <input data-tip="Province owner" class="provinceOwner" value="${stateName}" disabled">
-        <span data-tip="Click to overview province burgs" style="padding-right: 1px" class="icon-dot-circled pointer hide"></span>
+        <span data-tip="Click to overview province burgs" style="padding-right: 1px" class="icon-target pointer hide"></span>
         <div data-tip="Burgs count" class="provinceBurgs hide">${p.burgs.length}</div>
         <span data-tip="Province area" style="padding-right: 4px" class="icon-map-o hide"></span>
         <div data-tip="Province area" class="biomeArea hide">${si(area) + unit}</div>

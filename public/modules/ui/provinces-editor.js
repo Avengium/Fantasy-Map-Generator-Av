@@ -37,6 +37,7 @@ function editProvinces() {
   ensureEl("provincesRelease").on("click", triggerProvincesRelease);
   ensureEl("provincesAdd").on("click", enterAddProvinceMode);
   ensureEl("provincesRecolor").on("click", recolorProvinces);
+  ensureEl("provincesLocate").on("click", locateSelectedProvince);
 
   body.on("click", function (ev) {
     if (customization) return;
@@ -194,7 +195,7 @@ function editProvinces() {
     ensureEl("provincesFooterPopulation").dataset.population = totalPopulation;
 
     body.querySelectorAll("div.states").forEach(el => {
-      el.on("click", selectProvinceOnLineClick);
+      el.on("click", selectProvinceForLocate);
       el.on("mouseenter", ev => provinceHighlightOn(ev));
       el.on("mouseleave", ev => provinceHighlightOff(ev));
     });
@@ -257,6 +258,20 @@ function editProvinces() {
     };
 
     openPicker(currentFill, callback);
+  }
+
+  function selectProvinceForLocate() {
+    if (customization === 11) return; // skip if in manual assignment mode
+    if (this.parentNode.id !== "provincesBodySection") return;
+    body.querySelector("div.selected")?.classList.remove("selected");
+    this.classList.add("selected");
+  }
+
+  function locateSelectedProvince() {
+    const selected = body.querySelector("div.selected");
+    if (!selected) return tip("Select a province first", false, "warning");
+    const province = +selected.dataset.id;
+    locateProvince(province);
   }
 
   function capitalZoomIn(p) {
@@ -542,7 +557,6 @@ function editProvinces() {
     ensureEl("provinceNameEditorShortRandom").on("click", regenerateShortNameRandom);
     ensureEl("provinceNameEditorAddForm").on("click", addCustomForm);
     ensureEl("provinceNameEditorFullRegenerate").on("click", regenerateFullName);
-    ensureEl("provinceLocate").on("click", () => locateProvince(province));
 
     function regenerateShortNameCulture() {
       const province = +provinceNameEditor.dataset.province;
